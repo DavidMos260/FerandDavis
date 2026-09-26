@@ -78,7 +78,7 @@ h3{margin-bottom:8px}
 .photo{aspect-ratio:1;border-radius:18px;background:linear-gradient(135deg,#eee5f8,#f8f3fb);display:flex;align-items:center;justify-content:center;color:var(--muted);overflow:hidden}
 .photo img{width:100%;height:100%;object-fit:cover}
 .album-item{position:relative;aspect-ratio:1;border-radius:18px;overflow:hidden;background:var(--lilac-soft)}
-.album-item img{width:100%;height:100%;object-fit:cover;display:block}
+.album-item img,.album-item video{width:100%;height:100%;object-fit:cover;display:block;background:#000}
 .album-caption{position:absolute;left:0;right:0;bottom:0;padding:24px 12px 10px;background:linear-gradient(transparent,rgba(25,18,31,.72));color:#fff;font:600 13px Arial,sans-serif}
 .album-delete{position:absolute;right:9px;top:9px;border:0;border-radius:999px;background:rgba(255,255,255,.92);padding:7px 10px;font:700 11px Arial,sans-serif;color:var(--ink)}
 .album-empty{grid-column:1/-1;padding:32px;text-align:center;color:var(--muted)}
@@ -170,7 +170,6 @@ body.is-admin .admin-only{display:inline-flex!important}
   <div class="actions">
    <button class="btn ghost" onclick="go('album')">📸 Ver álbum</button>
    <button class="btn ghost" onclick="go('todos')">☑ Nuestra lista</button>
-    <button class="btn ghost" onclick="go('media')">🎞️ Multimedia</button>
     <button class="btn ghost" onclick="go('secrets')">🔐 Recuerdos</button>
   </div>
  </div>
@@ -194,49 +193,12 @@ body.is-admin .admin-only{display:inline-flex!important}
 <section class="screen" id="album">
  <div class="screen-inner">
   <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
-  <div class="section-head"><div><div class="eyebrow">Nuestros momentos</div><h2>Álbum</h2><p class="subtitle">Una colección de nuestros momentos juntos.</p></div><button class="btn lilac admin-only" onclick="addAlbumPhoto()">＋ Agregar foto</button></div>
+  <div class="section-head"><div><div class="eyebrow">Nuestros momentos</div><h2>Álbum</h2><p class="subtitle">Fotos y videos de nuestros momentos juntos.</p></div><button class="btn lilac admin-only" onclick="addAlbumMedia()">＋ Agregar foto o video</button></div>
   <div class="album" id="cloudAlbum"><div class="album-empty card">Cargando álbum…</div></div>
-  <div class="footer-note">Las fotografías se guardan en la nube y están disponibles en todos los dispositivos.</div>
+  <div class="footer-note">Las fotos y videos se guardan en la nube y están disponibles en todos los dispositivos.</div>
  </div>
 </section>
 
-
-<section class="screen" id="media">
- <div class="screen-inner">
-  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
-  <div class="section-head">
-   <div><div class="eyebrow">Capítulo 02.5</div><h2>Multimedia</h2><p class="subtitle">Aquí puedes incorporar las fotos, el video y la canción cuando tengas los archivos.</p></div>
-  </div>
-  <div class="v2-grid">
-   <article class="card media-card">
-    <div class="eyebrow">Álbum real</div><h3>📸 Fotografías</h3>
-    <p>Selecciona imágenes desde tu dispositivo. Se mostrarán en esta sesión sin alterar la estructura de la página.</p>
-    <input id="photoInput" type="file" accept="image/*" multiple>
-    <div id="photoStatus" class="status">Aún no has seleccionado fotografías.</div>
-    <div id="photoAlbum" class="album" style="margin-top:12px"></div>
-   </article>
-   <article class="card media-card">
-    <div class="eyebrow">Video</div><h3>🎥 Cumpleaños</h3>
-    <p>Selecciona el video real del cumpleaños para reproducirlo aquí.</p>
-    <input id="videoInput" type="file" accept="video/*">
-    <div id="videoStatus" class="status">Aún no has seleccionado un video.</div>
-    <video id="videoPlayer" class="media-preview" controls playsinline style="display:none;margin-top:12px"></video>
-   </article>
-   <article class="card media-card">
-    <div class="eyebrow">Música</div><h3>🎵 Te quiero tanto</h3>
-    <p>Selecciona el archivo de audio que quieras utilizar como canción de la página.</p>
-    <input id="audioInput" type="file" accept="audio/*">
-    <div id="audioStatus" class="status">Aún no has seleccionado una canción.</div>
-    <audio id="audioPlayer" class="audio-player" controls style="display:none"></audio>
-   </article>
-   <article class="card media-card">
-    <div class="eyebrow">Siguiente paso</div><h3>☁️ Compartir entre dispositivos</h3>
-    <p>La sincronización en la nube y el inicio de sesión requieren un servicio externo. Esta versión no finge tener sincronización cuando todavía no existe.</p>
-    <div class="media-actions"><button class="btn ghost" onclick="alert('La base está preparada. Para sincronización real necesitaremos conectar un backend o servicio de almacenamiento.')">Ver estado</button></div>
-   </article>
-  </div>
- </div>
-</section>
 
 <section class="screen" id="secrets">
  <div class="screen-inner">
@@ -413,18 +375,29 @@ async function loadAlbum(){
 }
 function renderAlbum(){
  const el=document.getElementById('cloudAlbum'); if(!el)return;
- if(!albumPhotos.length){el.innerHTML='<div class="album-empty card">Todavía no hay fotografías en el álbum. ❤️</div>';return}
- el.innerHTML=albumPhotos.map(p=>`<article class="album-item"><img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.title||'Fotografía')}"><div class="album-caption">${escapeHtml(p.title||'Nuestro momento')}</div><button class="album-delete admin-only" type="button" onclick="deleteAlbumPhoto(${p.id})">Eliminar</button></article>`).join('');
+ if(!albumPhotos.length){el.innerHTML='<div class="album-empty card">Todavía no hay fotos ni videos en el álbum. ❤️</div>';return}
+ el.innerHTML=albumPhotos.map(p=>{
+  const type=p.media_type==='video'?'video':'image';
+  const media=type==='video'
+   ? `<video src="${escapeHtml(p.image_url)}" controls playsinline preload="metadata"></video>`
+   : `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.title||'Fotografía')}">`;
+  return `<article class="album-item">${media}<div class="album-caption">${escapeHtml(p.title||'Nuestro momento')}</div><button class="album-delete admin-only" type="button" onclick="deleteAlbumPhoto(${p.id})">Eliminar</button></article>`;
+ }).join('');
 }
-async function addAlbumPhoto(){
+async function addAlbumMedia(){
  if(!isAdmin)return;
- const input=document.createElement('input');input.type='file';input.accept='image/jpeg,image/png,image/webp,image/gif';input.className='file-hidden';document.body.appendChild(input);
+ const input=document.createElement('input');input.type='file';input.accept='image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime';input.className='file-hidden';document.body.appendChild(input);
  input.addEventListener('change',async()=>{const file=input.files[0];input.remove();if(!file)return;
-  const title=prompt('Título de la fotografía:','Nuestro momento'); if(title===null)return;
-  try{const image_url=await uploadEventImage(file);const {data,error}=await supabaseClient.from('album_photos').insert({title:title.trim()||'Nuestro momento',image_url,sort_order:albumPhotos.length}).select().single();if(error)throw error;albumPhotos.push(data);renderAlbum()}
-  catch(err){console.error(err);alert('No se pudo agregar la fotografía al álbum.')}
- }); input.click();
+  const media_type=file.type.startsWith('video/')?'video':'image';
+  const title=prompt(media_type==='video'?'Título del video:':'Título de la fotografía:','Nuestro momento');if(title===null)return;
+  try{
+   const image_url=await uploadEventImage(file);
+   const {data,error}=await supabaseClient.from('album_photos').insert({title:title.trim()||'Nuestro momento',image_url,media_type,sort_order:albumPhotos.length}).select().single();
+   if(error)throw error;albumPhotos.push(data);renderAlbum();
+  }catch(err){console.error(err);alert('No se pudo agregar el archivo al álbum. Si es un video grande, intenta con un archivo más pequeño.')}
+ });input.click();
 }
+async function addAlbumPhoto(){return addAlbumMedia()}
 async function deleteAlbumPhoto(id){
  if(!isAdmin||!confirm('¿Eliminar esta fotografía del álbum?'))return;
  const {error}=await supabaseClient.from('album_photos').delete().eq('id',id);
@@ -658,25 +631,6 @@ function revealSecret(i){
  card.classList.toggle('revealed',!open);
  btn.textContent=open?'Descubrir':'Ocultar';
 }
-function initMedia(){
- const pi=document.getElementById('photoInput'), vi=document.getElementById('videoInput'), ai=document.getElementById('audioInput');
- if(pi)pi.addEventListener('change',e=>{
-   const files=[...e.target.files], album=document.getElementById('photoAlbum');
-   album.innerHTML='';
-   files.forEach(f=>{const url=URL.createObjectURL(f);const d=document.createElement('div');d.className='photo';const img=document.createElement('img');img.src=url;img.alt=f.name;d.appendChild(img);album.appendChild(d)});
-   document.getElementById('photoStatus').textContent=files.length?`${files.length} fotografía(s) seleccionada(s).`:'Aún no has seleccionado fotografías.';
- });
- if(vi)vi.addEventListener('change',e=>{
-   const f=e.target.files[0], p=document.getElementById('videoPlayer');
-   if(!f){p.style.display='none';return}
-   p.src=URL.createObjectURL(f);p.style.display='block';document.getElementById('videoStatus').textContent=f.name;
- });
- if(ai)ai.addEventListener('change',e=>{
-   const f=e.target.files[0], p=document.getElementById('audioPlayer');
-   if(!f){p.style.display='none';return}
-   p.src=URL.createObjectURL(f);p.style.display='block';document.getElementById('audioStatus').textContent=f.name;
- });
-}
 async function saveLetter(){
  if(!isAdmin)return;
  const content=document.getElementById('letterText').value;
@@ -695,7 +649,7 @@ async function loadLetter(){
 function toggleMusic(){document.getElementById('musicPanel').classList.toggle('open')}
 document.getElementById('eventImage')?.addEventListener('change',previewEventImage);
 document.getElementById('adminToggle')?.addEventListener('click',toggleAdminPanel);
-renderSecrets();initMedia();initSupabase();
+renderSecrets();initSupabase();
 </script>
 </div>
 </body>
