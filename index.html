@@ -408,7 +408,14 @@ async function addAlbumMedia(){
  if(!isAdmin)return;
  const input=document.createElement('input');input.type='file';input.accept='image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime';input.className='file-hidden';document.body.appendChild(input);
  input.addEventListener('change',async()=>{const file=input.files[0];input.remove();if(!file)return;
-  const media_type=file.type.startsWith('video/')?'video':'image';
+  const ext=(file.name.split('.').pop()||'').toLowerCase();
+  const media_type=(file.type.startsWith('video/')||['mp4','mov','m4v','webm','avi'].includes(ext))?'video':'image';
+  const MAX_VIDEO_BYTES=50*1024*1024;
+  if(media_type==='video'&&file.size>MAX_VIDEO_BYTES){
+   const mb=(file.size/1048576).toFixed(1);
+   alert('Este video pesa '+mb+' MB. El límite actual de Supabase es 50 MB.\n\nComprímelo o recórtalo hasta que pese menos de 50 MB y vuelve a intentarlo.');
+   return;
+  }
   const title=prompt(media_type==='video'?'Título del video:':'Título de la fotografía:','Nuestro momento');if(title===null)return;
   try{
    showUploadProgress(file);
