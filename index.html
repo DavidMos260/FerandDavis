@@ -46,8 +46,7 @@ h3{margin-bottom:8px}
 .music-panel.open{display:block}
 .music-title{font:700 14px Arial,sans-serif}
 .music-artist{font:12px Arial,sans-serif;color:var(--muted);margin:4px 0 12px}
-.fake-player{height:5px;background:var(--line);border-radius:5px;position:relative;margin-bottom:10px}
-.fake-player span{display:block;width:24%;height:100%;background:var(--lilac-dark);border-radius:5px}
+.fake-player{height:5px;background:var(--line);border-radius:5px;position:relative;margin-bottom:10px;cursor:pointer}.fake-player span{display:block;width:0;height:100%;background:var(--lilac-dark);border-radius:5px}.music-time{font:11px Arial,sans-serif;color:var(--muted);margin-bottom:8px}.music-admin{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 .music-note{font:12px Arial,sans-serif;color:var(--muted)}
 .timeline{position:relative;padding-left:22px}
 .timeline:before{content:"";position:absolute;left:7px;top:5px;bottom:5px;width:2px;background:var(--line)}
@@ -263,6 +262,7 @@ body.is-admin .admin-only{display:inline-flex!important}
   </div>
   <div id="adminLoggedIn" style="display:none">
    <h3>Modo administrador</h3><p id="adminUserLabel">Sesión iniciada.</p>
+   <div class="music-admin"><strong>Música del sitio</strong><p class="music-note">Sube la canción que sonará en el reproductor.</p><input class="admin-only" id="musicFile" type="file" accept="audio/mpeg,audio/mp4,audio/aac,.mp3,.m4a"><button class="btn lilac small admin-only" type="button" onclick="uploadSiteMusic()">Subir canción</button><div id="musicAdminStatus" class="admin-status"></div></div>
    <button class="btn ghost small" type="button" onclick="adminLogout()">Cerrar sesión</button>
   </div>
   <div class="admin-status" id="adminStatus"></div>
@@ -272,11 +272,13 @@ body.is-admin .admin-only{display:inline-flex!important}
 
 <div class="music">
  <div class="music-panel card" id="musicPanel">
-  <div class="music-title">Te quiero tanto</div><div class="music-artist">Kevin Kaarl</div>
-  <div class="fake-player"><span></span></div>
-  <div class="music-note">Reproductor visual de prueba. La canción real se conectará en la siguiente fase.</div>
+  <div class="music-title" id="musicTitle">Te quiero tanto</div><div class="music-artist" id="musicArtist">Kevin Kaarl</div>
+  <div class="fake-player" id="musicSeek"><span id="musicProgress"></span></div>
+  <div class="music-time" id="musicTime">0:00 / 0:00</div>
+  <div class="music-note" id="musicNote">Pulsa ▶ para escuchar nuestra canción.</div>
+  <audio id="siteAudio" preload="metadata"></audio>
  </div>
- <button class="music-toggle" onclick="toggleMusic()">▶</button>
+ <button class="music-toggle" id="musicToggle" onclick="toggleMusic()">▶</button>
 </div>
 
 <div class="modal" id="eventModal">
@@ -733,7 +735,35 @@ async function loadLetter(){
  const {data,error}=await supabaseClient.from('couple_letter').select('content').eq('id',1).maybeSingle();
  if(!error&&data)document.getElementById('letterText').value=data.content||'';
 }
-function toggleMusic(){document.getElementById('musicPanel').classList.toggle('open')}
+let siteMusic=null;
+async function loadSiteMusic(){
+ if(!supabaseClient)return;
+ const {data,error}=await supabaseClient.from('site_music').select('*').eq('id',1).maybeSingle();
+ if(error){console.error(error);return} siteMusic=data||null;
+ if(siteMusic){document.getElementById('musicTitle').textContent=siteMusic.title||'Te quiero tanto';document.getElementById('musicArtist').textContent=siteMusic.artist||'Kevin Kaarl';if(siteMusic.audio_url)document.getElementById('siteAudio').src=siteMusic.audio_url}
+}
+function fmtTime(s){if(!Number.isFinite(s))return '0:00';return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')}
+function toggleMusic(){
+ const audio=document.getElementById('siteAudio'),panel=document.getElementById('musicPanel'),btn=document.getElementById('musicToggle');
+ panel.classList.add('open');
+ if(!audio.src){document.getElementById('musicNote').textContent='La canción todavía no ha sido subida.';return}
+ if(audio.paused){audio.play().then(()=>{btn.textContent='⏸';document.getElementById('musicNote').textContent='Reproduciendo…'}).catch(()=>{})}
+ else{audio.pause();btn.textContent='▶';document.getElementById('musicNote').textContent='En pausa'}
+}
+async function uploadSiteMusic(){
+ if(!isAdmin)return;const input=document.getElementById('musicFile'),file=input?.files?.[0],status=document.getElementById('musicAdminStatus');
+ if(!file){status.textContent='Selecciona un archivo de audio.';return}
+ try{status.textContent='Subiendo canción…';const ext=(file.name.split('.').pop()||'mp3').toLowerCase();const path='main.'+ext;
+ const {error}=await supabaseClient.storage.from('site-music').upload(path,file,{upsert:true,contentType:file.type||'audio/mpeg',cacheControl:'3600'});if(error)throw error;
+ const {data}=supabaseClient.storage.from('site-music').getPublicUrl(path);const url=data.publicUrl+'?v='+Date.now();
+ const {error:dbError}=await supabaseClient.from('site_music').upsert({id:1,title:'Te quiero tanto',artist:'Kevin Kaarl',audio_url:url,updated_at:new Date().toISOString()});if(dbError)throw dbError;
+ status.textContent='Canción guardada correctamente.';await loadSiteMusic();
+ }catch(e){console.error(e);status.textContent='No se pudo subir: '+(e?.message||'error desconocido')}
+}
+const audioEl=document.getElementById('siteAudio');
+audioEl?.addEventListener('timeupdate',()=>{const p=audioEl.duration?audioEl.currentTime/audioEl.duration*100:0;document.getElementById('musicProgress').style.width=p+'%';document.getElementById('musicTime').textContent=fmtTime(audioEl.currentTime)+' / '+fmtTime(audioEl.duration)});
+audioEl?.addEventListener('ended',()=>{document.getElementById('musicToggle').textContent='▶'});
+document.getElementById('musicSeek')?.addEventListener('click',e=>{if(!audioEl?.duration)return;const r=e.currentTarget.getBoundingClientRect();audioEl.currentTime=((e.clientX-r.left)/r.width)*audioEl.duration});
 document.getElementById('eventImage')?.addEventListener('change',previewEventImage);
 document.getElementById('adminToggle')?.addEventListener('click',toggleAdminPanel);
 renderSecrets();initSupabase();
