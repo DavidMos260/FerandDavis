@@ -131,7 +131,8 @@ video.media-preview{aspect-ratio:16/9}
 .file-hidden{display:none}
 .admin-only{display:none!important}
 body.is-admin .admin-only{display:inline-flex!important}
-.admin-access{position:fixed;left:18px;bottom:18px;z-index:55}
+.admin-access{position:fixed;left:18px;bottom:18px;z-index:150;pointer-events:auto}
+.admin-access *{pointer-events:auto}
 .admin-toggle{border:1px solid var(--line);background:rgba(255,255,255,.92);color:var(--muted);border-radius:999px;padding:9px 13px;font:600 11px Arial,sans-serif;box-shadow:var(--shadow)}
 .admin-panel{position:absolute;left:0;bottom:48px;width:min(330px,calc(100vw - 36px));padding:17px;display:none}
 .admin-panel.open{display:block}
@@ -280,7 +281,7 @@ body.is-admin .admin-only{display:inline-flex!important}
   </div>
   <div class="admin-status" id="adminStatus"></div>
  </div>
- <button class="admin-toggle" type="button" onclick="toggleAdminPanel()">⚙ Administrar</button>
+ <button class="admin-toggle" id="adminToggle" type="button">⚙ Administrar</button>
 </div>
 
 <div class="music">
@@ -650,6 +651,7 @@ function loadLetter(){
 
 function toggleMusic(){document.getElementById('musicPanel').classList.toggle('open')}
 document.getElementById('eventImage')?.addEventListener('change',previewEventImage);
+document.getElementById('adminToggle')?.addEventListener('click',toggleAdminPanel);
 renderTodos();renderSecrets();initMedia();loadLetter();initSupabase();
 </script>
 </div>
