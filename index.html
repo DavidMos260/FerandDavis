@@ -182,12 +182,12 @@ body.is-admin .admin-only{display:inline-flex!important}
   <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
   <div class="section-head"><div><div class="eyebrow">Capítulo 02</div><h2>Nuestra lista</h2><p class="subtitle">Cosas que todavía nos faltan vivir juntos.</p></div></div>
   <div class="card" style="padding:18px">
-   <div class="add-row"><input id="todoInput" placeholder="Agregar algo que quieran hacer juntos..."><button class="btn lilac" onclick="addTodo()">＋</button></div>
+   <div class="add-row admin-only"><input id="todoInput" placeholder="Agregar algo que quieran hacer juntos..."><button class="btn lilac" onclick="addTodo()">＋</button></div>
    <div class="progress-wrap"><div class="progress" id="progress"></div></div>
    <div id="todoCount" class="music-note"></div>
    <div id="todosList" class="list"></div>
   </div>
-  <div class="footer-note">El progreso se guarda en este dispositivo en esta primera versión.</div>
+  <div class="footer-note">La lista está sincronizada en la nube.</div>
  </div>
 </section>
 
@@ -254,9 +254,9 @@ body.is-admin .admin-only{display:inline-flex!important}
   <div class="card letter">
    <div class="eyebrow">El final... por ahora</div>
    <h2>Fer, tengo algo que decirte.</h2>
-   <p>Esta carta queda editable para que puedas escribir tus propias palabras. Se guarda en este dispositivo.</p>
-   <textarea id="letterText" placeholder="Escribe aquí tu carta..."></textarea>
-   <div class="letter-toolbar">
+   <p>Esta carta está sincronizada en la nube. Solo puede modificarse desde el modo administrador.</p>
+   <textarea id="letterText" placeholder="Escribe aquí tu carta..." readonly></textarea>
+   <div class="letter-toolbar admin-only">
     <button class="btn lilac" onclick="saveLetter()">Guardar carta</button>
     <button class="btn ghost" onclick="clearLetter()">Borrar</button>
    </div>
@@ -443,15 +443,17 @@ async function uploadEventImage(file){
  return data.publicUrl;
 }
 
-const KEY_TODOS='fd_todos_v1';
 let events=[];
 let albumPhotos=[];
-let todos=JSON.parse(localStorage.getItem(KEY_TODOS)||'null')||[
- {id:2,text:'Hacer un viaje juntos',done:false},
- {id:3,text:'Ver un amanecer juntos',done:false},{id:4,text:'Ir a un concierto',done:false}
-];
-function persist(){localStorage.setItem(KEY_TODOS,JSON.stringify(todos))}
-function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id)); if(id==='story')renderEvents();if(id==='album')loadAlbum();if(id==='todos')renderTodos();if(id==='secrets')renderSecrets()}
+let todos=[];
+function persist(){}
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));if(id==='story')renderEvents();if(id==='album')loadAlbum();if(id==='todos')loadTodos();if(id==='letter')loadLetter();if(id==='secrets')renderSecrets()}
+async function loadTodos(){
+ if(!supabaseClient)return;
+ const {data,error}=await supabaseClient.from('couple_todos').select('*').order('sort_order',{ascending:true}).order('id',{ascending:true});
+ if(error){console.error(error);return}
+ todos=Array.isArray(data)?data:[];renderTodos();
+}
 function fmt(d){return new Date(d+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})}
 function renderEvents(){
  const el=document.getElementById('timeline');
@@ -612,10 +614,16 @@ async function deleteEvent(id){
  }
  events=events.filter(e=>e.id!==id);persist();renderEvents();
 }
-function renderTodos(){let done=todos.filter(x=>x.done).length,total=todos.length;document.getElementById('progress').style.width=(total?done/total*100:0)+'%';document.getElementById('todoCount').textContent=`${done} de ${total} completadas`;document.getElementById('todosList').innerHTML=todos.map(t=>`<label class="todo card ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTodo(${t.id})"><span>${escapeHtml(t.text)}</span><button class="btn ghost small" type="button" onclick="deleteTodo(${t.id})">×</button></label>`).join('')}
-function addTodo(){let v=document.getElementById('todoInput').value.trim();if(!v)return;todos.push({id:Date.now(),text:v,done:false});document.getElementById('todoInput').value='';persist();renderTodos()}
-function toggleTodo(id){let t=todos.find(x=>x.id===id);t.done=!t.done;persist();renderTodos()}
-function deleteTodo(id){todos=todos.filter(x=>x.id!==id);persist();renderTodos()}
+function renderTodos(){
+ const progress=document.getElementById('progress');if(!progress)return;
+ let done=todos.filter(x=>x.done).length,total=todos.length;
+ progress.style.width=(total?done/total*100:0)+'%';
+ document.getElementById('todoCount').textContent=`${done} de ${total} completadas`;
+ document.getElementById('todosList').innerHTML=todos.map(t=>`<label class="todo card ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} ${isAdmin?'':'disabled'} onchange="toggleTodo(${t.id})"><span>${escapeHtml(t.text)}</span><button class="btn ghost small admin-only" type="button" onclick="deleteTodo(${t.id})">×</button></label>`).join('');
+}
+async function addTodo(){if(!isAdmin)return;let v=document.getElementById('todoInput').value.trim();if(!v)return;const {data,error}=await supabaseClient.from('couple_todos').insert({text:v,done:false,sort_order:todos.length}).select().single();if(error){alert('No se pudo agregar.');return}todos.push(data);document.getElementById('todoInput').value='';renderTodos()}
+async function toggleTodo(id){if(!isAdmin)return;let t=todos.find(x=>x.id===id);if(!t)return;const {data,error}=await supabaseClient.from('couple_todos').update({done:!t.done}).eq('id',id).select().single();if(error)return;Object.assign(t,data);renderTodos()}
+async function deleteTodo(id){if(!isAdmin)return;const {error}=await supabaseClient.from('couple_todos').delete().eq('id',id);if(error)return;todos=todos.filter(x=>x.id!==id);renderTodos()}
 const SECRET_ITEMS=[
  {title:'Nuestra primera cita',text:'Un momento que marcó el inicio de todo lo que vino después.'},
  {title:'El primer regalo',text:'Un pequeño detalle que se quedó como parte de nuestra historia.'},
@@ -665,26 +673,25 @@ function initMedia(){
    p.src=URL.createObjectURL(f);p.style.display='block';document.getElementById('audioStatus').textContent=f.name;
  });
 }
-function saveLetter(){
- const value=document.getElementById('letterText').value;
- localStorage.setItem('fd_letter_v1',value);
- document.getElementById('letterStatus').textContent='Carta guardada en este dispositivo.';
+async function saveLetter(){
+ if(!isAdmin)return;
+ const content=document.getElementById('letterText').value;
+ const {error}=await supabaseClient.from('couple_letter').upsert({id:1,content,updated_at:new Date().toISOString()});
+ document.getElementById('letterStatus').textContent=error?'No se pudo guardar.':'Carta guardada en la nube.';
 }
-function clearLetter(){
- if(!confirm('¿Borrar la carta guardada?'))return;
- document.getElementById('letterText').value='';
- localStorage.removeItem('fd_letter_v1');
- document.getElementById('letterStatus').textContent='Carta borrada.';
+async function clearLetter(){
+ if(!isAdmin||!confirm('¿Borrar la carta guardada?'))return;
+ document.getElementById('letterText').value='';await saveLetter();
 }
-function loadLetter(){
- const v=localStorage.getItem('fd_letter_v1')||'';
- document.getElementById('letterText').value=v;
+async function loadLetter(){
+ if(!supabaseClient)return;
+ const {data,error}=await supabaseClient.from('couple_letter').select('content').eq('id',1).maybeSingle();
+ if(!error&&data)document.getElementById('letterText').value=data.content||'';
 }
-
 function toggleMusic(){document.getElementById('musicPanel').classList.toggle('open')}
 document.getElementById('eventImage')?.addEventListener('change',previewEventImage);
 document.getElementById('adminToggle')?.addEventListener('click',toggleAdminPanel);
-renderTodos();renderSecrets();initMedia();loadLetter();initSupabase();
+renderSecrets();initMedia();initSupabase();
 </script>
 </div>
 </body>
