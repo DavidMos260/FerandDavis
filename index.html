@@ -388,6 +388,7 @@ async function initSupabase(){
    events=[];
    renderEvents();
  }
+ await Promise.all([loadAlbum(),loadTodos(),loadLetter(),loadSiteMusic()]);
 }
 async function loadAlbum(){
  const el=document.getElementById('cloudAlbum');
