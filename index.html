@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fer & Davis</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>body{font-family:system-ui,sans-serif;background:#f4efff;color:#2d2340;margin:0;padding:24px}main{max-width:760px;margin:auto}button,input,textarea{font:inherit}article{background:#fff;padding:16px;border-radius:16px;margin:12px 0}img{max-width:100%;border-radius:14px}.actions{display:flex;gap:8px;flex-wrap:wrap}.modal{display:none;position:fixed;inset:0;background:#0007;align-items:center;justify-content:center;padding:20px}.modal.open{display:flex}.box{background:#fff;max-width:520px;width:100%;padding:20px;border-radius:18px}.box input,.box textarea{width:100%;box-sizing:border-box;margin:6px 0 12px;padding:10px}</style>
+</head>
+<body>
+<main>
+<h1>Fer & Davis</h1>
+<h2>Nuestra historia</h2>
+<button onclick="openEvent()">Agregar recuerdo</button>
+<div id="timeline"></div>
+</main>
+<div id="modal" class="modal"><div class="box">
+<h3 id="modalTitle">Nuevo recuerdo</h3>
+<label>Fecha</label><input id="eventDate" type="date">
+<label>Título</label><input id="eventTitle">
+<label>Descripción</label><textarea id="eventDesc"></textarea>
+<label>Imagen</label><input id="eventImage" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+<div class="actions"><button onclick="saveEvent()">Guardar</button><button onclick="closeEvent()">Cancelar</button></div>
+</div></div>
+<script>
+const SUPABASE_URL='https://ehyctjjdaqgxphlewdwq.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_tJ-EEvB5KirznaGNFujxuQ__RkuI1ad';
+let supabaseClient=null,events=[],editingId=null;
+function normalizeEvent(x){return {...x,desc:x.description??x.desc??''}}
+async function initSupabase(){
+  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  const {data,error}=await supabaseClient.from('events').select('*').order('date',{ascending:true}).order('id',{ascending:true});
+  if(error){alert('No se pudieron leer los recuerdos: '+error.message);return}
+  events=(data||[]).map(normalizeEvent);renderEvents();
+}
+function renderEvents(){
+  const el=document.getElementById('timeline');
+  el.innerHTML=events.length?events.map(e=>`<article>
+    ${e.image_url?`<img src="${e.image_url}" alt="">`:''}
+    <small>${e.date}</small><h3>${e.title}</h3><p>${e.desc||''}</p>
+    <div class="actions"><button onclick="openEvent(${e.id})">Editar</button><button onclick="deleteEvent(${e.id})">Eliminar</button></div>
+  </article>`).join(''):'<p>No hay recuerdos todavía.</p>';
+}
+function openEvent(id=null){
+  editingId=id;
+  const e=events.find(x=>x.id===id);
+  eventDate.value=e?.date||'';eventTitle.value=e?.title||'';eventDesc.value=e?.desc||'';eventImage.value='';
+  modalTitle.textContent=e?'Editar recuerdo':'Nuevo recuerdo';modal.classList.add('open');
+}
+function closeEvent(){modal.classList.remove('open');editingId=null}
+async function uploadEventImage(file){
+  if(!file)return null;
+  const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+  const path=`events/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+  const {error}=await supabaseClient.storage.from('event-images').upload(path,file,{upsert:false});
+  if(error)throw error;
+  const {data}=supabaseClient.storage.from('event-images').getPublicUrl(path);
+  return data.publicUrl;
+}
+async function saveEvent(){
+  const date=eventDate.value,title=eventTitle.value.trim(),description=eventDesc.value.trim();
+  if(!date||!title){alert('Fecha y título son obligatorios.');return}
+  try{
+    let image_url=editingId?events.find(e=>e.id===editingId)?.image_url:null;
+    if(eventImage.files[0])image_url=await uploadEventImage(eventImage.files[0]);
+    if(editingId){
+      const {data,error}=await supabaseClient.from('events').update({date,title,description,image_url}).eq('id',editingId).select().single();
+      if(error)throw error;
+      events=events.map(e=>e.id===editingId?normalizeEvent(data):e);
+    }else{
+      const {data,error}=await supabaseClient.from('events').insert({date,title,description,image_url}).select().single();
+      if(error)throw error;
+      events.push(normalizeEvent(data));events.sort((a,b)=>a.date.localeCompare(b.date)||a.id-b.id);
+    }
+    closeEvent();renderEvents();
+  }catch(err){alert('No se pudo guardar: '+err.message)}
+}
+async function deleteEvent(id){
+  if(!confirm('¿Eliminar este recuerdo?'))return;
+  const {error}=await supabaseClient.from('events').delete().eq('id',id);
+  if(error){alert('No se pudo eliminar: '+error.message);return}
+  events=events.filter(e=>e.id!==id);renderEvents();
+}
+initSupabase();
+</script>
+</body>
+</html>
