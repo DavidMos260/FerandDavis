@@ -229,6 +229,23 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
 .album-title-modal .modal-card{width:min(460px,100%)}
 .album-title-modal input{font-size:16px}
 @media(max-width:650px){.photo-lightbox{padding:62px 12px 78px}.photo-lightbox img{max-height:calc(100dvh - 155px)}.photo-lightbox-nav{top:auto;bottom:18px;transform:none}.photo-lightbox-prev{left:18px}.photo-lightbox-next{right:18px}.photo-lightbox-title{bottom:31px;left:72px;right:72px;font-size:12px}.album-order{bottom:7px;left:7px}}
+
+.love-counter{margin:20px auto 22px;width:min(540px,100%);border:1px solid var(--line);border-radius:24px;background:rgba(255,255,255,.68);padding:15px 18px;cursor:pointer;box-shadow:0 10px 28px rgba(72,48,94,.07);transition:transform .2s ease,box-shadow .2s ease}
+.love-counter:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(72,48,94,.11)}
+.love-counter-label{font:700 10px Arial,sans-serif;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+.love-counter-main{font:700 clamp(18px,4.5vw,25px) Georgia,serif;color:var(--lilac-dark);margin:7px 0 4px}
+.love-counter-clock{font:600 13px Arial,sans-serif;color:var(--ink);font-variant-numeric:tabular-nums}
+.love-counter-hint{font:11px Arial,sans-serif;color:var(--muted);margin-top:7px}
+.counter-detail .modal-card{width:min(520px,100%);text-align:center}
+.counter-big-heart{font-size:31px;color:var(--lilac-dark);margin:5px 0 10px}
+.counter-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}
+.counter-stat{border:1px solid var(--line);border-radius:15px;padding:12px 7px;background:rgba(255,255,255,.75)}
+.counter-stat b{display:block;font:700 20px Georgia,serif;color:var(--lilac-dark);font-variant-numeric:tabular-nums}
+.counter-stat span{font:10px Arial,sans-serif;color:var(--muted)}
+.counter-total{font:12px Arial,sans-serif;color:var(--muted);line-height:1.5}
+.counter-special{display:none;margin:10px 0 0;font:600 13px Arial,sans-serif;color:var(--lilac-dark)}
+.counter-special.show{display:block}
+@media(max-width:650px){.love-counter{margin:16px auto 20px;padding:14px}.counter-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
 </head>
@@ -260,13 +277,37 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
   </div>
  </div>
 </div>
+<div class="modal counter-detail" id="counterDetailModal">
+ <div class="modal-card card">
+  <div class="eyebrow">Nuestro tiempo juntos</div>
+  <div class="counter-big-heart">♥</div>
+  <h3 id="counterDetailTitle">Desde aquel 26 de septiembre</h3>
+  <div class="counter-grid">
+   <div class="counter-stat"><b id="counterYears">0</b><span>años</span></div>
+   <div class="counter-stat"><b id="counterMonths">0</b><span>meses</span></div>
+   <div class="counter-stat"><b id="counterDays">0</b><span>días</span></div>
+   <div class="counter-stat"><b id="counterHours">0</b><span>horas</span></div>
+   <div class="counter-stat"><b id="counterMinutes">0</b><span>minutos</span></div>
+   <div class="counter-stat"><b id="counterSeconds">0</b><span>segundos</span></div>
+  </div>
+  <div class="counter-total" id="counterTotal"></div>
+  <div class="modal-actions"><button class="btn lilac" type="button" onclick="closeCounterDetail()">Cerrar</button></div>
+ </div>
+</div>
 <div class="app">
 <section class="screen hero active" id="home">
  <div class="screen-inner">
-  <div class="eyebrow">29.08.2025 — ∞</div>
+  <div class="eyebrow">26.09.2025 — ∞</div>
   <h1>Fer &amp; Davis</h1>
   <p class="subtitle">Nuestra historia</p>
   <div class="hero-heart">♥</div>
+  <button class="love-counter" type="button" onclick="openCounterDetail()" aria-label="Ver contador detallado">
+   <div class="love-counter-label">Juntos y contando...</div>
+   <div class="love-counter-main" id="counterMain">Calculando nuestro tiempo…</div>
+   <div class="love-counter-clock" id="counterClock">00 h · 00 min · 00 s</div>
+   <div class="love-counter-hint">Desde el 26 de septiembre de 2025 · 3:49 p. m. · Toca para ver más</div>
+   <div class="counter-special" id="counterSpecial"></div>
+  </button>
   <button class="btn lilac" onclick="go('story')">Comenzar</button>
  </div>
 </section>
@@ -275,7 +316,7 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
  <div class="screen-inner">
   <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('home')">← Inicio</button></div>
   <div class="section-head">
-   <div><div class="eyebrow">Capítulo 01</div><h2>Nuestra historia</h2><p class="subtitle">Desde el 29 de agosto de 2025.</p></div>
+   <div><div class="eyebrow">Capítulo 01</div><h2>Nuestra historia</h2><p class="subtitle">Desde el 26 de septiembre de 2025.</p></div>
    <button class="btn lilac admin-only" onclick="openEvent()">＋ Agregar recuerdo</button>
   </div>
   <div id="timeline" class="timeline"></div>
@@ -936,6 +977,39 @@ document.addEventListener('keydown',e=>{
 });
 document.getElementById('photoLightbox')?.addEventListener('click',e=>{if(e.target.id==='photoLightbox')closePhotoLightbox()});
 document.getElementById('albumTitleModal')?.addEventListener('click',e=>{if(e.target.id==='albumTitleModal')closeAlbumTitleModal()});
+
+const LOVE_START={year:2025,month:8,day:26,hour:15,minute:49};
+function loveStartDate(){return new Date(LOVE_START.year,LOVE_START.month,LOVE_START.day,LOVE_START.hour,LOVE_START.minute,0,0)}
+function addLoveParts(base,y,m,d){
+ const x=new Date(base);x.setFullYear(x.getFullYear()+y);x.setMonth(x.getMonth()+m);x.setDate(x.getDate()+d);return x;
+}
+function getLoveElapsed(now=new Date()){
+ const start=loveStartDate();if(now<start)return {future:true,start};
+ let cursor=new Date(start),years=0,months=0,days=0,next;
+ while((next=addLoveParts(cursor,1,0,0))<=now){cursor=next;years++}
+ while((next=addLoveParts(cursor,0,1,0))<=now){cursor=next;months++}
+ while((next=addLoveParts(cursor,0,0,1))<=now){cursor=next;days++}
+ let ms=now-cursor;const hours=Math.floor(ms/3600000);ms-=hours*3600000;const minutes=Math.floor(ms/60000);ms-=minutes*60000;const seconds=Math.floor(ms/1000);
+ const totalDays=Math.floor((now-start)/86400000);
+ return {future:false,years,months,days,hours,minutes,seconds,totalDays,start};
+}
+function plural(n,one,many){return n===1?one:many}
+function updateLoveCounter(){
+ const now=new Date(),v=getLoveElapsed(now),main=document.getElementById('counterMain');if(!main)return;
+ if(v.future){main.textContent='Nuestra historia comienza el 26 de septiembre de 2025';document.getElementById('counterClock').textContent='3:49 p. m.';return}
+ const dateParts=[];if(v.years)dateParts.push(v.years+' '+plural(v.years,'año','años'));if(v.months)dateParts.push(v.months+' '+plural(v.months,'mes','meses'));dateParts.push(v.days+' '+plural(v.days,'día','días'));
+ main.textContent=dateParts.join(' · ');
+ document.getElementById('counterClock').textContent=String(v.hours).padStart(2,'0')+' h · '+String(v.minutes).padStart(2,'0')+' min · '+String(v.seconds).padStart(2,'0')+' s';
+ const special=document.getElementById('counterSpecial');special.classList.remove('show');special.textContent='';
+ if(now.getMonth()===8&&now.getDate()===26){special.textContent='♥ Feliz aniversario · Hoy celebramos otro año de nuestra historia';special.classList.add('show')}
+ else if(now.getDate()===26){special.textContent='♡ Hoy sumamos otro mes a nuestra historia';special.classList.add('show')}
+ for(const [id,val] of [['counterYears',v.years],['counterMonths',v.months],['counterDays',v.days],['counterHours',v.hours],['counterMinutes',v.minutes],['counterSeconds',v.seconds]]){const el=document.getElementById(id);if(el)el.textContent=val}
+ const total=document.getElementById('counterTotal');if(total)total.textContent=v.totalDays.toLocaleString('es-MX')+' días completos desde el 26 de septiembre de 2025 a las 3:49 p. m. · y seguimos contando...';
+}
+function openCounterDetail(){updateLoveCounter();document.getElementById('counterDetailModal')?.classList.add('open')}
+function closeCounterDetail(){document.getElementById('counterDetailModal')?.classList.remove('open')}
+document.getElementById('counterDetailModal')?.addEventListener('click',e=>{if(e.target.id==='counterDetailModal')closeCounterDetail()});
+updateLoveCounter();setInterval(updateLoveCounter,1000);
 </script>
 </div>
 </body>
