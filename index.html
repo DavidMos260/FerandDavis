@@ -323,6 +323,47 @@ const SUPABASE_ANON_KEY='sb_publishable_tJ-EEvB5KirznaGNFujxuQ__RkuI1ad';
 let supabaseClient=null;
 window.supabaseClient=null;
 
+const ADMIN_UID='89153caa-0f60-4c68-b482-7747bcf65093';
+let isAdmin=false;
+
+function toggleAdminPanel(){
+ const panel=document.getElementById('adminPanel');
+ if(panel) panel.classList.toggle('open');
+}
+function setAdminState(session){
+ const user=session?.user||null;
+ isAdmin=!!user && user.id===ADMIN_UID;
+ document.body.classList.toggle('is-admin',isAdmin);
+ const out=document.getElementById('adminLoggedOut');
+ const inside=document.getElementById('adminLoggedIn');
+ const label=document.getElementById('adminUserLabel');
+ const status=document.getElementById('adminStatus');
+ if(out)out.style.display=isAdmin?'none':'block';
+ if(inside)inside.style.display=isAdmin?'block':'none';
+ if(label)label.textContent=isAdmin?'Sesión iniciada como '+(user.email||'administrador')+'.':'';
+ if(status)status.textContent=user&&!isAdmin?'Esta cuenta no tiene permisos de administrador.':'';
+ renderEvents();
+}
+async function adminLogin(){
+ if(!supabaseClient)return;
+ const email=document.getElementById('adminEmail').value.trim();
+ const password=document.getElementById('adminPassword').value;
+ const status=document.getElementById('adminStatus');
+ if(!email||!password){status.textContent='Escribe tu correo y contraseña.';return}
+ status.textContent='Iniciando sesión…';
+ const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+ document.getElementById('adminPassword').value='';
+ if(error){status.textContent='No se pudo iniciar sesión. Revisa el correo y la contraseña.';return}
+ setAdminState(data.session);
+ if(isAdmin)status.textContent='Acceso concedido.';
+}
+async function adminLogout(){
+ if(!supabaseClient)return;
+ await supabaseClient.auth.signOut();
+ setAdminState(null);
+ document.getElementById('adminPanel')?.classList.remove('open');
+}
+
 function normalizeEvent(row,fallback={}){
  return {
    id:row.id??fallback.id,
@@ -339,6 +380,9 @@ async function initSupabase(){
  }
  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
  window.supabaseClient=supabaseClient;
+ const {data:{session}}=await supabaseClient.auth.getSession();
+ setAdminState(session);
+ supabaseClient.auth.onAuthStateChange((_event,newSession)=>setAdminState(newSession));
  try{
    const {data,error}=await supabaseClient.from('events').select('*').order('date',{ascending:true}).order('id',{ascending:true});
    if(error)throw error;
@@ -396,7 +440,7 @@ function renderEvents(){
          <div class="event-date">${fmt(e.date)}</div>
          <h3>${escapeHtml(e.title)}</h3>
          <p>${escapeHtml(e.desc||'')}</p>
-         <div class="actions">
+         <div class="actions admin-only">
            <button class="btn ghost small" onclick="editEvent(${e.id})">Editar</button>
            <button class="btn ghost small" onclick="deleteEvent(${e.id})">Eliminar</button>
          </div>
@@ -408,6 +452,7 @@ function renderEvents(){
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function openEvent(){
+ if(!isAdmin)return;
  const modal=document.getElementById('eventModal');
  document.getElementById('modalTitle').textContent='Agregar recuerdo';
  document.getElementById('eventDate').value='';
@@ -419,6 +464,7 @@ function openEvent(){
  modal.classList.add('open');
 }
 function editEvent(id){
+ if(!isAdmin)return;
  const e=events.find(x=>x.id===id);
  if(!e)return;
  const modal=document.getElementById('eventModal');
@@ -448,6 +494,7 @@ function previewEventImage(){
  setEventImagePreview(URL.createObjectURL(f));
 }
 async function saveEvent(){
+ if(!isAdmin){alert('Inicia sesión como administrador.');return}
  const date=document.getElementById('eventDate').value;
  const title=document.getElementById('eventTitle').value.trim();
  const desc=document.getElementById('eventDesc').value.trim();
@@ -494,6 +541,7 @@ async function saveEvent(){
  persist();closeEvent();renderEvents();
 }
 async function changeEventImage(id){
+ if(!isAdmin)return;
  const e=events.find(x=>x.id===id);
  if(!e)return;
  const input=document.createElement('input');
@@ -520,6 +568,7 @@ async function changeEventImage(id){
 }
 
 async function deleteEvent(id){
+ if(!isAdmin)return;
  if(!confirm('¿Eliminar este recuerdo?'))return;
  if(window.supabaseClient){
    try{
