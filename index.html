@@ -216,7 +216,7 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
 @media(prefers-reduced-motion:reduce){
  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
-</style>
+.admin-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.admin-head h3{margin:3px 0 0}.admin-dot{width:10px;height:10px;border-radius:50%;background:#68a978;box-shadow:0 0 0 5px rgba(104,169,120,.12);margin:8px 4px}.admin-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}.admin-shortcut{border:1px solid var(--line);background:#fff;border-radius:15px;padding:11px;text-align:left;color:var(--ink);display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center}.admin-shortcut>span{grid-row:1/3;font-size:18px;color:var(--lilac-dark)}.admin-shortcut b{font:700 12px Arial,sans-serif}.admin-shortcut small{font:10px Arial,sans-serif;color:var(--muted);margin-top:2px}.admin-shortcut:hover{background:var(--lilac-soft)}.admin-logout{width:100%;justify-content:center}.admin-session-note{font:11px Arial,sans-serif;color:var(--muted)}@media(max-width:380px){.admin-shortcuts{grid-template-columns:1fr}}</style>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
 </head>
 <body>
@@ -324,9 +324,15 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
    </div>
   </div>
   <div id="adminLoggedIn" style="display:none">
-   <h3>Modo administrador</h3><p id="adminUserLabel">Sesión iniciada.</p>
-   
-   <button class="btn ghost small" type="button" onclick="adminLogout()">Cerrar sesión</button>
+   <div class="admin-head"><div><div class="eyebrow">Centro de control</div><h3>Modo administrador</h3></div><span class="admin-dot" title="Sesión activa"></span></div>
+   <p id="adminUserLabel">Sesión iniciada.</p>
+   <div class="admin-shortcuts">
+    <button class="admin-shortcut" type="button" onclick="adminGo('story')"><span>♡</span><b>Historia</b><small>Recuerdos</small></button>
+    <button class="admin-shortcut" type="button" onclick="adminGo('album')"><span>▧</span><b>Álbum</b><small>Fotos y videos</small></button>
+    <button class="admin-shortcut" type="button" onclick="adminGo('todos')"><span>✓</span><b>Lista</b><small>Planes juntos</small></button>
+    <button class="admin-shortcut" type="button" onclick="adminGo('letter')"><span>✉</span><b>Carta</b><small>Editar carta</small></button>
+   </div>
+   <button class="btn ghost small admin-logout" type="button" onclick="adminLogout()">Cerrar sesión</button>
   </div>
   <div class="admin-status" id="adminStatus"></div>
  </div>
@@ -402,6 +408,7 @@ function setAdminState(session){
  renderTodos();
  renderAlbum();
 }
+function adminGo(screen){document.getElementById('adminPanel')?.classList.remove('open');go(screen)}
 async function adminLogin(){
  if(!supabaseClient)return;
  const email=document.getElementById('adminEmail').value.trim();
