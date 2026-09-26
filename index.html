@@ -40,7 +40,7 @@ h3{margin-bottom:8px}
 .hero-heart{font-size:30px;color:var(--lilac-dark);margin:8px 0 25px;animation:pulse 2.5s infinite}
 .hero-date{font:600 13px Arial,sans-serif;letter-spacing:.2em;color:var(--muted);margin-bottom:28px}
 .hero .btn{padding:15px 28px}
-.music{position:fixed;right:18px;bottom:18px;z-index:50}.music-toggle{width:54px;height:54px;border-radius:50%;border:1px solid var(--line);background:#fff;box-shadow:var(--shadow);color:var(--lilac-dark);font-size:19px;transition:.25s}.music-toggle.playing{animation:musicPulse 1.8s infinite}.music-panel{position:absolute;right:0;bottom:66px;width:min(330px,calc(100vw - 36px));padding:18px;display:none}.music-panel.open{display:block;animation:fade .2s ease}.music-head{display:flex;gap:12px;align-items:center;margin-bottom:14px}.music-cover{width:52px;height:52px;border-radius:15px;background:linear-gradient(135deg,var(--lilac-soft),#fff);display:grid;place-items:center;font-size:23px;box-shadow:inset 0 0 0 1px var(--line)}.music-title{font:700 15px Arial,sans-serif}.music-artist{font:12px Arial,sans-serif;color:var(--muted);margin-top:4px}.fake-player{height:7px;background:var(--line);border-radius:7px;position:relative;cursor:pointer;touch-action:none}.fake-player span{display:block;width:0;height:100%;background:var(--lilac-dark);border-radius:7px}.music-time{display:flex;justify-content:space-between;font:11px Arial,sans-serif;color:var(--muted);margin:6px 0 12px}.music-controls{display:flex;align-items:center;justify-content:center;gap:10px}.music-control{width:40px;height:40px;border:1px solid var(--line);border-radius:50%;background:#fff;color:var(--lilac-dark);font-size:16px}.music-control.main{width:48px;height:48px;background:var(--lilac-dark);color:#fff;border:0;font-size:18px}.music-volume{display:flex;align-items:center;gap:8px;margin-top:13px}.music-volume input{width:100%;accent-color:var(--lilac-dark)}.music-note{font:12px Arial,sans-serif;color:var(--muted);text-align:center;margin-top:10px}.music-admin{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}@keyframes musicPulse{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 8px rgba(169,139,208,.18),var(--shadow)}}
+.music{position:fixed;right:18px;bottom:18px;z-index:50}.music-toggle{width:54px;height:54px;border-radius:50%;border:1px solid var(--line);background:#fff;box-shadow:var(--shadow);color:var(--lilac-dark);font-size:19px;transition:.25s}.music-toggle.playing{animation:musicPulse 1.8s infinite}.music-panel{position:absolute;right:0;bottom:66px;width:min(330px,calc(100vw - 36px));padding:18px;display:none}.music-panel.open{display:block;animation:fade .2s ease}.music-head{display:flex;gap:12px;align-items:center;margin-bottom:14px}.music-cover{width:52px;height:52px;border-radius:15px;background:linear-gradient(135deg,var(--lilac-soft),#fff);display:grid;place-items:center;font-size:23px;box-shadow:inset 0 0 0 1px var(--line)}.music-title{font:700 15px Arial,sans-serif}.music-artist{font:12px Arial,sans-serif;color:var(--muted);margin-top:4px}.fake-player{height:7px;background:var(--line);border-radius:7px;position:relative;cursor:pointer;touch-action:none}.fake-player span{display:block;width:0;height:100%;background:var(--lilac-dark);border-radius:7px}.music-time{display:flex;justify-content:space-between;font:11px Arial,sans-serif;color:var(--muted);margin:6px 0 12px}.music-controls{display:flex;align-items:center;justify-content:center;gap:10px}.music-control{width:40px;height:40px;border:1px solid var(--line);border-radius:50%;background:#fff;color:var(--lilac-dark);font-size:16px}.music-control.main{width:48px;height:48px;background:var(--lilac-dark);color:#fff;border:0;font-size:18px}.music-volume{display:flex;align-items:center;gap:8px;margin-top:13px}.music-volume input{width:100%;accent-color:var(--lilac-dark)}.music-note{font:12px Arial,sans-serif;color:var(--muted);text-align:center;margin-top:10px}@keyframes musicPulse{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 8px rgba(169,139,208,.18),var(--shadow)}}
 .timeline{position:relative;padding-left:22px}
 .timeline:before{content:"";position:absolute;left:7px;top:5px;bottom:5px;width:2px;background:var(--line)}
 .event{position:relative;margin:0 0 18px;padding:20px 20px 20px 22px}
@@ -247,6 +247,22 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
 .counter-special.show{display:block}
 @media(max-width:650px){.love-counter{margin:16px auto 20px;padding:14px}.counter-grid{grid-template-columns:repeat(2,1fr)}}
 .music-cover{overflow:hidden;padding:0}.music-cover img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* Final interaction polish */
+.reveal-in{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s cubic-bezier(.2,.75,.25,1)}
+.reveal-in.is-visible{opacity:1;transform:none}
+.hero-heart{animation:heartFloat 3s ease-in-out infinite}
+@keyframes heartFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-4px) scale(1.05)}}
+.screen.active .screen-inner{animation:screenEnter .38s ease both}
+@keyframes screenEnter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.ui-dialog{z-index:900}
+.ui-dialog .modal-card{width:min(450px,100%)}
+.ui-dialog-icon{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--lilac-soft);color:var(--lilac-dark);font-size:22px;margin-bottom:12px}
+.ui-dialog h3{margin:0 0 8px}.ui-dialog p{margin:0;color:var(--muted);line-height:1.55;white-space:pre-line}
+.ui-dialog .modal-actions{margin-top:20px}
+.ui-dialog-danger .ui-dialog-icon{background:#f8eeee;color:#9d5050}
+.ui-dialog-danger .btn.primary-action{background:#9d5050;color:#fff;border-color:#9d5050}
+@media(prefers-reduced-motion:reduce){.reveal-in,.screen.active .screen-inner,.hero-heart{opacity:1!important;transform:none!important;animation:none!important;transition:none!important}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
 </head>
@@ -293,6 +309,16 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
   </div>
   <div class="counter-total" id="counterTotal"></div>
   <div class="modal-actions"><button class="btn lilac" type="button" onclick="closeCounterDetail()">Cerrar</button></div>
+ </div>
+</div>
+<div class="modal ui-dialog" id="uiDialog" role="dialog" aria-modal="true" aria-labelledby="uiDialogTitle">
+ <div class="modal-card card">
+  <div class="ui-dialog-icon" id="uiDialogIcon">♡</div>
+  <h3 id="uiDialogTitle">Aviso</h3>
+  <p id="uiDialogMessage"></p>
+  <div class="modal-actions" id="uiDialogActions">
+   <button class="btn lilac primary-action" id="uiDialogOk" type="button">Aceptar</button>
+  </div>
  </div>
 </div>
 <div class="app">
@@ -443,6 +469,32 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+let uiDialogResolve=null;
+function closeUiDialog(result=true){
+ const modal=document.getElementById('uiDialog');if(!modal)return;
+ modal.classList.remove('open','ui-dialog-danger');
+ const resolve=uiDialogResolve;uiDialogResolve=null;if(resolve)resolve(result);
+}
+function showNotice(message,title='Aviso'){
+ const modal=document.getElementById('uiDialog');if(!modal)return Promise.resolve();
+ document.getElementById('uiDialogTitle').textContent=title;document.getElementById('uiDialogMessage').textContent=message;
+ document.getElementById('uiDialogIcon').textContent='♡';
+ document.getElementById('uiDialogActions').innerHTML='<button class="btn lilac primary-action" id="uiDialogOk" type="button">Aceptar</button>';
+ modal.classList.remove('ui-dialog-danger');modal.classList.add('open');
+ return new Promise(resolve=>{uiDialogResolve=resolve;document.getElementById('uiDialogOk').onclick=()=>closeUiDialog(true)});
+}
+function showConfirm(message,{title='Confirmar',danger=false,confirmText='Continuar'}={}){
+ const modal=document.getElementById('uiDialog');if(!modal)return Promise.resolve(false);
+ document.getElementById('uiDialogTitle').textContent=title;document.getElementById('uiDialogMessage').textContent=message;
+ document.getElementById('uiDialogIcon').textContent=danger?'!':'♡';
+ document.getElementById('uiDialogActions').innerHTML='<button class="btn ghost" id="uiDialogCancel" type="button">Cancelar</button><button class="btn lilac primary-action" id="uiDialogOk" type="button"></button>';
+ document.getElementById('uiDialogOk').textContent=confirmText;modal.classList.toggle('ui-dialog-danger',danger);modal.classList.add('open');
+ return new Promise(resolve=>{uiDialogResolve=resolve;document.getElementById('uiDialogCancel').onclick=()=>closeUiDialog(false);document.getElementById('uiDialogOk').onclick=()=>closeUiDialog(true)});
+}
+const revealObserver=('IntersectionObserver' in window)?new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-visible');revealObserver.unobserve(entry.target)}})},{threshold:.08,rootMargin:'0px 0px -25px'}):null;
+function prepareReveals(root=document){
+ root.querySelectorAll('.event,.album-item,.todo,.secret,.letter').forEach((el,i)=>{if(el.dataset.revealReady)return;el.dataset.revealReady='1';el.classList.add('reveal-in');el.style.transitionDelay=Math.min(i,5)*45+'ms';if(revealObserver)revealObserver.observe(el);else el.classList.add('is-visible')});
+}
 /* Supabase
    Proyecto conectado: DavidMos260's Project.
    “Nuestra historia” lee, crea, edita y elimina recuerdos directamente en public.events.
@@ -592,7 +644,7 @@ async function addAlbumMedia(){
   const MAX_VIDEO_BYTES=50*1024*1024;
   if(media_type==='video'&&file.size>MAX_VIDEO_BYTES){
    const mb=(file.size/1048576).toFixed(1);
-   alert('Este video pesa '+mb+' MB. El límite actual de Supabase es 50 MB.\n\nComprímelo o recórtalo hasta que pese menos de 50 MB y vuelve a intentarlo.');
+   showNotice('Este video pesa '+mb+' MB. El límite actual de Supabase es 50 MB.\n\nComprímelo o recórtalo hasta que pese menos de 50 MB y vuelve a intentarlo.');
    return;
   }
   const title=prompt(media_type==='video'?'Título del video:':'Título de la fotografía:','Nuestro momento');if(title===null)return;
@@ -601,7 +653,7 @@ async function addAlbumMedia(){
    const image_url=await uploadEventImage(file);
    const {data,error}=await supabaseClient.from('album_photos').insert({title:title.trim()||'Nuestro momento',image_url,media_type,sort_order:albumPhotos.length}).select().single();
    if(error)throw error;albumPhotos.push(data);hideUploadProgress();renderAlbum();
-  }catch(err){hideUploadProgress();console.error(err);alert('No se pudo agregar el archivo al álbum: '+(err?.message||'Error desconocido'))}
+  }catch(err){hideUploadProgress();console.error(err);showNotice('No se pudo agregar el archivo al álbum: '+(err?.message||'Error desconocido'))}
  });input.click();
 }
 async function addAlbumPhoto(){return addAlbumMedia()}
@@ -623,7 +675,7 @@ async function saveAlbumTitle(){
  if(!isAdmin||editingAlbumId===null)return;const p=albumPhotos.find(x=>x.id===editingAlbumId);if(!p)return;
  const clean=document.getElementById('albumTitleInput').value.trim()||'Nuestro momento';
  const {data,error}=await supabaseClient.from('album_photos').update({title:clean}).eq('id',editingAlbumId).select().single();
- if(error){console.error(error);alert('No se pudo actualizar el título.');return}
+ if(error){console.error(error);showNotice('No se pudo actualizar el título.');return}
  Object.assign(p,data);closeAlbumTitleModal();renderAlbum();
 }
 async function moveAlbumItem(id,direction){
@@ -634,16 +686,16 @@ async function moveAlbumItem(id,direction){
   const results=await Promise.all(next.map((p,i)=>supabaseClient.from('album_photos').update({sort_order:i}).eq('id',p.id)));
   const failed=results.find(r=>r.error);if(failed)throw failed.error;
   albumPhotos=next.map((p,i)=>({...p,sort_order:i}));
- }catch(error){console.error(error);albumPhotos=previous;renderAlbum();alert('No se pudo cambiar el orden del álbum.')}
+ }catch(error){console.error(error);albumPhotos=previous;renderAlbum();showNotice('No se pudo cambiar el orden del álbum.')}
 }
 async function deleteAlbumPhoto(id){
  if(!isAdmin)return;const p=albumPhotos.find(x=>x.id===id);if(!p)return;
- if(!confirm('¿Eliminar este momento? El archivo también se borrará permanentemente de la nube.'))return;
+ if(!await showConfirm('¿Eliminar este momento? El archivo también se borrará permanentemente de la nube.',{title:'Eliminar del álbum',danger:true,confirmText:'Eliminar'}))return;
  try{
   const {error}=await supabaseClient.from('album_photos').delete().eq('id',id);if(error)throw error;
   albumPhotos=albumPhotos.filter(x=>x.id!==id);renderAlbum();
-  try{await removeStoredFile(p.image_url,'event-images')}catch(cleanErr){console.warn('El registro se eliminó, pero no se pudo limpiar el archivo',cleanErr);alert('El momento se eliminó del álbum, pero no se pudo borrar su archivo de Storage.')}
- }catch(error){console.error(error);alert('No se pudo eliminar el momento del álbum.')}
+  try{await removeStoredFile(p.image_url,'event-images')}catch(cleanErr){console.warn('El registro se eliminó, pero no se pudo limpiar el archivo',cleanErr);showNotice('El momento se eliminó del álbum, pero no se pudo borrar su archivo de Storage.')}
+ }catch(error){console.error(error);showNotice('No se pudo eliminar el momento del álbum.')}
 }
 
 function showUploadProgress(file){
@@ -702,7 +754,7 @@ let events=[];
 let albumPhotos=[];
 let todos=[];
 function persist(){}
-function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));if(id==='story')renderEvents();if(id==='album')loadAlbum();if(id==='todos')loadTodos();if(id==='letter')loadLetter();if(id==='secrets')renderSecrets()}
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));if(id==='story')renderEvents();if(id==='album')loadAlbum();if(id==='todos')loadTodos();if(id==='letter')loadLetter();if(id==='secrets')renderSecrets();requestAnimationFrame(()=>prepareReveals(document.getElementById(id)||document))}
 async function loadTodos(){
  if(!supabaseClient)return;
  const {data,error}=await supabaseClient.from('couple_todos').select('*').order('sort_order',{ascending:true}).order('id',{ascending:true});
@@ -784,12 +836,12 @@ function previewEventImage(){
  setEventImagePreview(URL.createObjectURL(f));
 }
 async function saveEvent(){
- if(!isAdmin){alert('Inicia sesión como administrador.');return}
+ if(!isAdmin){showNotice('Inicia sesión como administrador.');return}
  const date=document.getElementById('eventDate').value;
  const title=document.getElementById('eventTitle').value.trim();
  const desc=document.getElementById('eventDesc').value.trim();
  const file=document.getElementById('eventImage').files[0];
- if(!date||!title){alert('Fecha y título son obligatorios.');return}
+ if(!date||!title){showNotice('Fecha y título son obligatorios.');return}
  const id=Number(document.getElementById('eventModal').dataset.id);
 
  if(window.supabaseClient){
@@ -815,7 +867,7 @@ async function saveEvent(){
      closeEvent();renderEvents();return;
    }catch(err){
      console.error(err);
-     alert('No se pudo guardar en Supabase. Revisa la configuración y las tablas.');
+     showNotice('No se pudo guardar en Supabase. Revisa la configuración y las tablas.');
      return;
    }
  }
@@ -853,7 +905,7 @@ async function changeEventImage(id){
        const idx=events.findIndex(x=>x.id===id);
        if(idx>=0)events[idx]=normalizeEvent(data,events[idx]);
          renderEvents();
-     }catch(err){console.error(err);alert('No se pudo cambiar la imagen en Supabase.')}
+     }catch(err){console.error(err);showNotice('No se pudo cambiar la imagen en Supabase.')}
    }else{
      e.image=URL.createObjectURL(file);persist();renderEvents();
    }
@@ -863,7 +915,7 @@ async function changeEventImage(id){
 
 async function deleteEvent(id){
  if(!isAdmin)return;
- if(!confirm('¿Eliminar este recuerdo?'))return;
+ if(!await showConfirm('¿Eliminar este recuerdo?',{title:'Eliminar recuerdo',danger:true,confirmText:'Eliminar'}))return;
  if(window.supabaseClient){
    try{
      const event=events.find(e=>e.id===id);const oldImage=event?.image_url||event?.image||'';
@@ -872,7 +924,7 @@ async function deleteEvent(id){
      events=events.filter(e=>e.id!==id);renderEvents();
      if(oldImage){try{await removeStoredFile(oldImage,'event-images')}catch(cleanErr){console.warn('El recuerdo se eliminó, pero no se pudo limpiar su imagen',cleanErr)}}
      return;
-   }catch(err){console.error(err);alert('No se pudo eliminar el recuerdo de Supabase.');return}
+   }catch(err){console.error(err);showNotice('No se pudo eliminar el recuerdo de Supabase.');return}
  }
  events=events.filter(e=>e.id!==id);persist();renderEvents();
 }
@@ -881,11 +933,11 @@ function renderTodos(){
  let done=todos.filter(x=>x.done).length,total=todos.length;
  progress.style.width=(total?done/total*100:0)+'%';
  document.getElementById('todoCount').textContent=`${done} de ${total} completadas`;
- document.getElementById('todosList').innerHTML=todos.map(t=>`<label class="todo card ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} ${isAdmin?'':'disabled'} onchange="toggleTodo(${t.id})"><span>${escapeHtml(t.text)}</span><button class="btn ghost small admin-only" type="button" onclick="deleteTodo(${t.id})">×</button></label>`).join('');
+ const list=document.getElementById('todosList');list.innerHTML=todos.map(t=>`<label class="todo card ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} ${isAdmin?'':'disabled'} onchange="toggleTodo(${t.id})"><span>${escapeHtml(t.text)}</span><button class="btn ghost small admin-only" type="button" onclick="deleteTodo(${t.id})">×</button></label>`).join('');prepareReveals(list);
 }
-async function addTodo(){if(!isAdmin)return;let v=document.getElementById('todoInput').value.trim();if(!v)return;const {data,error}=await supabaseClient.from('couple_todos').insert({text:v,done:false,sort_order:todos.length}).select().single();if(error){alert('No se pudo agregar.');return}todos.push(data);document.getElementById('todoInput').value='';renderTodos()}
+async function addTodo(){if(!isAdmin)return;let v=document.getElementById('todoInput').value.trim();if(!v)return;const {data,error}=await supabaseClient.from('couple_todos').insert({text:v,done:false,sort_order:todos.length}).select().single();if(error){showNotice('No se pudo agregar.');return}todos.push(data);document.getElementById('todoInput').value='';renderTodos()}
 async function toggleTodo(id){if(!isAdmin)return;let t=todos.find(x=>x.id===id);if(!t)return;const {data,error}=await supabaseClient.from('couple_todos').update({done:!t.done}).eq('id',id).select().single();if(error)return;Object.assign(t,data);renderTodos()}
-async function deleteTodo(id){if(!isAdmin)return;const {error}=await supabaseClient.from('couple_todos').delete().eq('id',id);if(error)return;todos=todos.filter(x=>x.id!==id);renderTodos()}
+async function deleteTodo(id){if(!isAdmin)return;const t=todos.find(x=>x.id===id);if(!t)return;if(!await showConfirm('¿Eliminar “'+t.text+'” de nuestra lista?',{title:'Eliminar de la lista',danger:true,confirmText:'Eliminar'}))return;const {error}=await supabaseClient.from('couple_todos').delete().eq('id',id);if(error){showNotice('No se pudo eliminar de la lista.','Algo salió mal');return}todos=todos.filter(x=>x.id!==id);renderTodos()}
 const SECRET_ITEMS=[
  {title:'Nuestra primera cita',text:'Un momento que marcó el inicio de todo lo que vino después.'},
  {title:'El primer regalo',text:'Un pequeño detalle que se quedó como parte de nuestra historia.'},
@@ -906,6 +958,7 @@ function renderSecrets(){
    <div class="secret-body" id="secret-body-${i}" style="display:none">${escapeHtml(x.text)}</div>
    <button class="btn ghost small reveal-btn" onclick="revealSecret(${i})">Descubrir</button>
  </article>`).join('');
+ prepareReveals(el);
 }
 function revealSecret(i){
  const body=document.getElementById('secret-body-'+i);
@@ -923,7 +976,7 @@ async function saveLetter(){
  document.getElementById('letterStatus').textContent=error?'No se pudo guardar.':'Carta guardada en la nube.';
 }
 async function clearLetter(){
- if(!isAdmin||!confirm('¿Borrar la carta guardada?'))return;
+ if(!isAdmin)return;if(!await showConfirm('¿Borrar la carta guardada?',{title:'Borrar carta',danger:true,confirmText:'Borrar'}))return;
  document.getElementById('letterText').value='';await saveLetter();
 }
 async function loadLetter(){
@@ -1011,6 +1064,10 @@ function openCounterDetail(){updateLoveCounter();document.getElementById('counte
 function closeCounterDetail(){document.getElementById('counterDetailModal')?.classList.remove('open')}
 document.getElementById('counterDetailModal')?.addEventListener('click',e=>{if(e.target.id==='counterDetailModal')closeCounterDetail()});
 updateLoveCounter();setInterval(updateLoveCounter,1000);
+
+document.getElementById('uiDialog')?.addEventListener('click',e=>{if(e.target.id==='uiDialog')closeUiDialog(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('uiDialog')?.classList.contains('open'))closeUiDialog(false)});
+requestAnimationFrame(()=>prepareReveals(document.querySelector('.screen.active')||document));
 </script>
 </div>
 </body>
