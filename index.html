@@ -40,14 +40,7 @@ h3{margin-bottom:8px}
 .hero-heart{font-size:30px;color:var(--lilac-dark);margin:8px 0 25px;animation:pulse 2.5s infinite}
 .hero-date{font:600 13px Arial,sans-serif;letter-spacing:.2em;color:var(--muted);margin-bottom:28px}
 .hero .btn{padding:15px 28px}
-.music{position:fixed;right:18px;bottom:18px;z-index:50}
-.music-toggle{width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:#fff;box-shadow:var(--shadow);color:var(--lilac-dark);font-size:18px}
-.music-panel{position:absolute;right:0;bottom:58px;width:270px;padding:15px;display:none}
-.music-panel.open{display:block}
-.music-title{font:700 14px Arial,sans-serif}
-.music-artist{font:12px Arial,sans-serif;color:var(--muted);margin:4px 0 12px}
-.fake-player{height:5px;background:var(--line);border-radius:5px;position:relative;margin-bottom:10px;cursor:pointer}.fake-player span{display:block;width:0;height:100%;background:var(--lilac-dark);border-radius:5px}.music-time{font:11px Arial,sans-serif;color:var(--muted);margin-bottom:8px}.music-admin{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
-.music-note{font:12px Arial,sans-serif;color:var(--muted)}
+.music{position:fixed;right:18px;bottom:18px;z-index:50}.music-toggle{width:54px;height:54px;border-radius:50%;border:1px solid var(--line);background:#fff;box-shadow:var(--shadow);color:var(--lilac-dark);font-size:19px;transition:.25s}.music-toggle.playing{animation:musicPulse 1.8s infinite}.music-panel{position:absolute;right:0;bottom:66px;width:min(330px,calc(100vw - 36px));padding:18px;display:none}.music-panel.open{display:block;animation:fade .2s ease}.music-head{display:flex;gap:12px;align-items:center;margin-bottom:14px}.music-cover{width:52px;height:52px;border-radius:15px;background:linear-gradient(135deg,var(--lilac-soft),#fff);display:grid;place-items:center;font-size:23px;box-shadow:inset 0 0 0 1px var(--line)}.music-title{font:700 15px Arial,sans-serif}.music-artist{font:12px Arial,sans-serif;color:var(--muted);margin-top:4px}.fake-player{height:7px;background:var(--line);border-radius:7px;position:relative;cursor:pointer;touch-action:none}.fake-player span{display:block;width:0;height:100%;background:var(--lilac-dark);border-radius:7px}.music-time{display:flex;justify-content:space-between;font:11px Arial,sans-serif;color:var(--muted);margin:6px 0 12px}.music-controls{display:flex;align-items:center;justify-content:center;gap:10px}.music-control{width:40px;height:40px;border:1px solid var(--line);border-radius:50%;background:#fff;color:var(--lilac-dark);font-size:16px}.music-control.main{width:48px;height:48px;background:var(--lilac-dark);color:#fff;border:0;font-size:18px}.music-volume{display:flex;align-items:center;gap:8px;margin-top:13px}.music-volume input{width:100%;accent-color:var(--lilac-dark)}.music-note{font:12px Arial,sans-serif;color:var(--muted);text-align:center;margin-top:10px}.music-admin{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}@keyframes musicPulse{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 8px rgba(169,139,208,.18),var(--shadow)}}
 .timeline{position:relative;padding-left:22px}
 .timeline:before{content:"";position:absolute;left:7px;top:5px;bottom:5px;width:2px;background:var(--line)}
 .event{position:relative;margin:0 0 18px;padding:20px 20px 20px 22px}
@@ -273,9 +266,11 @@ body.is-admin .admin-only{display:inline-flex!important}
 
 <div class="music">
  <div class="music-panel card" id="musicPanel">
-  <div class="music-title" id="musicTitle">Te quiero tanto</div><div class="music-artist" id="musicArtist">Kevin Kaarl</div>
-  <div class="fake-player" id="musicSeek"><span id="musicProgress"></span></div>
-  <div class="music-time" id="musicTime">0:00 / 0:00</div>
+  <div class="music-head"><div class="music-cover">♥</div><div><div class="music-title" id="musicTitle">Te quiero tanto</div><div class="music-artist" id="musicArtist">Kevin Kaarl</div></div></div>
+  <div class="fake-player" id="musicSeek" aria-label="Posición de la canción"><span id="musicProgress"></span></div>
+  <div class="music-time"><span id="musicCurrent">0:00</span><span id="musicDuration">0:00</span></div>
+  <div class="music-controls"><button class="music-control" type="button" onclick="skipMusic(-10)" aria-label="Retroceder 10 segundos">↶</button><button class="music-control main" id="musicPanelToggle" type="button" onclick="playPauseMusic()" aria-label="Reproducir o pausar">▶</button><button class="music-control" type="button" onclick="skipMusic(10)" aria-label="Adelantar 10 segundos">↷</button></div>
+  <div class="music-volume"><button class="music-control" id="musicMute" type="button" onclick="toggleMute()" aria-label="Silenciar">🔊</button><input id="musicVolume" type="range" min="0" max="1" step="0.05" value="0.8" aria-label="Volumen"></div>
   <div class="music-note" id="musicNote">Pulsa ▶ para escuchar nuestra canción.</div>
   <audio id="siteAudio" preload="metadata"></audio>
  </div>
@@ -768,13 +763,23 @@ async function loadSiteMusic(){
  if(siteMusic){document.getElementById('musicTitle').textContent=siteMusic.title||'Te quiero tanto';document.getElementById('musicArtist').textContent=siteMusic.artist||'Kevin Kaarl';if(siteMusic.audio_url)document.getElementById('siteAudio').src=siteMusic.audio_url}
 }
 function fmtTime(s){if(!Number.isFinite(s))return '0:00';return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')}
-function toggleMusic(){
- const audio=document.getElementById('siteAudio'),panel=document.getElementById('musicPanel'),btn=document.getElementById('musicToggle');
- panel.classList.add('open');
- if(!audio.src){document.getElementById('musicNote').textContent='La canción todavía no ha sido subida.';return}
- if(audio.paused){audio.play().then(()=>{btn.textContent='⏸';document.getElementById('musicNote').textContent='Reproduciendo…'}).catch(()=>{})}
- else{audio.pause();btn.textContent='▶';document.getElementById('musicNote').textContent='En pausa'}
+function syncMusicUI(){
+ const a=document.getElementById('siteAudio'),playing=a&&!a.paused&&!a.ended;
+ const icon=playing?'⏸':'▶';document.getElementById('musicToggle').textContent=icon;document.getElementById('musicPanelToggle').textContent=icon;
+ document.getElementById('musicToggle').classList.toggle('playing',playing);
+ document.getElementById('musicNote').textContent=playing?'Reproduciendo nuestra canción…':(a?.currentTime?'En pausa':'Pulsa ▶ para escuchar nuestra canción.');
 }
+function toggleMusic(){
+ const panel=document.getElementById('musicPanel'),audio=document.getElementById('siteAudio');
+ if(panel.classList.contains('open')){panel.classList.remove('open');return}
+ panel.classList.add('open');if(!audio.src)document.getElementById('musicNote').textContent='La canción todavía no ha sido subida.';
+}
+async function playPauseMusic(){
+ const a=document.getElementById('siteAudio');if(!a.src){document.getElementById('musicNote').textContent='La canción todavía no ha sido subida.';return}
+ try{if(a.paused)await a.play();else a.pause();syncMusicUI()}catch(e){document.getElementById('musicNote').textContent='El navegador no permitió iniciar la reproducción.'}
+}
+function skipMusic(seconds){const a=document.getElementById('siteAudio');if(!a?.duration)return;a.currentTime=Math.max(0,Math.min(a.duration,a.currentTime+seconds))}
+function toggleMute(){const a=document.getElementById('siteAudio');if(!a)return;a.muted=!a.muted;document.getElementById('musicMute').textContent=a.muted?'🔇':'🔊'}
 async function uploadSiteMusic(){
  if(!isAdmin)return;const input=document.getElementById('musicFile'),file=input?.files?.[0],status=document.getElementById('musicAdminStatus');
  if(!file){status.textContent='Selecciona un archivo de audio.';return}
@@ -786,9 +791,13 @@ async function uploadSiteMusic(){
  }catch(e){console.error(e);status.textContent='No se pudo subir: '+(e?.message||'error desconocido')}
 }
 const audioEl=document.getElementById('siteAudio');
-audioEl?.addEventListener('timeupdate',()=>{const p=audioEl.duration?audioEl.currentTime/audioEl.duration*100:0;document.getElementById('musicProgress').style.width=p+'%';document.getElementById('musicTime').textContent=fmtTime(audioEl.currentTime)+' / '+fmtTime(audioEl.duration)});
-audioEl?.addEventListener('ended',()=>{document.getElementById('musicToggle').textContent='▶'});
-document.getElementById('musicSeek')?.addEventListener('click',e=>{if(!audioEl?.duration)return;const r=e.currentTarget.getBoundingClientRect();audioEl.currentTime=((e.clientX-r.left)/r.width)*audioEl.duration});
+if(audioEl){audioEl.volume=.8;
+ audioEl.addEventListener('timeupdate',()=>{const p=audioEl.duration?audioEl.currentTime/audioEl.duration*100:0;document.getElementById('musicProgress').style.width=p+'%';document.getElementById('musicCurrent').textContent=fmtTime(audioEl.currentTime);document.getElementById('musicDuration').textContent=fmtTime(audioEl.duration)});
+ audioEl.addEventListener('loadedmetadata',()=>{document.getElementById('musicDuration').textContent=fmtTime(audioEl.duration)});
+ audioEl.addEventListener('play',syncMusicUI);audioEl.addEventListener('pause',syncMusicUI);audioEl.addEventListener('ended',()=>{audioEl.currentTime=0;syncMusicUI()});
+}
+document.getElementById('musicSeek')?.addEventListener('click',e=>{if(!audioEl?.duration)return;const r=e.currentTarget.getBoundingClientRect();audioEl.currentTime=Math.max(0,Math.min(audioEl.duration,((e.clientX-r.left)/r.width)*audioEl.duration))});
+document.getElementById('musicVolume')?.addEventListener('input',e=>{if(!audioEl)return;audioEl.volume=Number(e.target.value);audioEl.muted=false;document.getElementById('musicMute').textContent=audioEl.volume===0?'🔇':'🔊'});
 document.getElementById('eventImage')?.addEventListener('change',previewEventImage);
 document.getElementById('adminToggle')?.addEventListener('click',toggleAdminPanel);
 renderSecrets();initSupabase();
