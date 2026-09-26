@@ -160,14 +160,15 @@ body.is-admin .admin-only{display:inline-flex!important}
 <body>
 <div class="upload-overlay" id="uploadOverlay" role="status" aria-live="polite">
  <div class="upload-box">
+  <div class="eyebrow">Guardando nuestro momento</div>
   <h3 id="uploadTitle">Subiendo archivo…</h3>
   <p id="uploadMessage">No cierres esta página mientras termina la carga.</p>
-  <div class="upload-track"><div class="upload-bar" id="uploadBar"></div></div>
+  <div class="upload-progress"><div id="uploadBar"></div></div>
   <div class="upload-percent" id="uploadPercent">0%</div>
+  <div class="upload-detail" id="uploadDetail">Preparando archivo…</div>
   <div class="upload-file" id="uploadFile"></div>
  </div>
 </div>
-<div id="uploadOverlay" class="upload-overlay"><div class="upload-box"><div class="eyebrow">Guardando nuestro momento</div><h3 id="uploadTitle">Subiendo archivo…</h3><div class="upload-progress"><div id="uploadBar"></div></div><div id="uploadPercent" class="upload-percent">0%</div><div id="uploadDetail" class="upload-detail">Preparando archivo…</div></div></div>
 <div class="app">
 <section class="screen hero active" id="home">
  <div class="screen-inner">
@@ -421,7 +422,7 @@ async function addAlbumMedia(){
    showUploadProgress(file);
    const image_url=await uploadEventImage(file);
    const {data,error}=await supabaseClient.from('album_photos').insert({title:title.trim()||'Nuestro momento',image_url,media_type,sort_order:albumPhotos.length}).select().single();
-   if(error)throw error;albumPhotos.push(data);renderAlbum();hideUploadProgress();hideUploadProgress();
+   if(error)throw error;albumPhotos.push(data);hideUploadProgress();renderAlbum();
   }catch(err){hideUploadProgress();console.error(err);alert('No se pudo agregar el archivo al álbum: '+(err?.message||'Error desconocido'))}
  });input.click();
 }
@@ -435,25 +436,25 @@ async function deleteAlbumPhoto(id){
 
 function showUploadProgress(file){
  const o=document.getElementById('uploadOverlay');if(!o)return;
+ const isVideo=file?.type?.startsWith('video/')||/\.(mp4|mov|m4v|webm|avi)$/i.test(file?.name||'');
  document.getElementById('uploadFile').textContent=file?.name||'';
  document.getElementById('uploadBar').style.width='0%';
  document.getElementById('uploadPercent').textContent='0%';
- document.getElementById('uploadTitle').textContent='Subiendo '+(file?.type?.startsWith('video/')?'video':'archivo')+'…';
+ document.getElementById('uploadTitle').textContent='Subiendo '+(isVideo?'video':'archivo')+'…';
  document.getElementById('uploadMessage').textContent='No cierres esta página mientras termina la carga.';
- o.classList.add('open');
+ document.getElementById('uploadDetail').textContent='Preparando archivo…';
+ o.classList.add('show');
 }
-function updateUploadProgress(percent){
- const p=Math.max(0,Math.min(100,Math.round(percent)));
+function setUploadProgress(percent,detail){
+ const p=Math.max(0,Math.min(100,Math.round(percent||0)));
+ const o=document.getElementById('uploadOverlay');if(o)o.classList.add('show');
  document.getElementById('uploadBar').style.width=p+'%';
  document.getElementById('uploadPercent').textContent=p+'%';
+ document.getElementById('uploadDetail').textContent=detail||'Subiendo…';
 }
-function hideUploadProgress(){document.getElementById('uploadOverlay')?.classList.remove('open')}
-function setUploadProgress(percent,detail){
- const overlay=document.getElementById('uploadOverlay'),bar=document.getElementById('uploadBar'),pct=document.getElementById('uploadPercent'),txt=document.getElementById('uploadDetail');
- if(overlay)overlay.classList.add('show');const p=Math.max(0,Math.min(100,Math.round(percent||0)));
- if(bar)bar.style.width=p+'%';if(pct)pct.textContent=p+'%';if(txt)txt.textContent=detail||'Subiendo…';
+function hideUploadProgress(){
+ const o=document.getElementById('uploadOverlay');if(o)o.classList.remove('show');
 }
-function hideUploadProgress(){document.getElementById('uploadOverlay')?.classList.remove('show')}
 async function uploadEventImage(file){
  if(!window.supabaseClient)throw new Error('Supabase no configurado');
  const ext=(file.name.split('.').pop()||'bin').toLowerCase();
