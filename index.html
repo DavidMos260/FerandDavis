@@ -469,10 +469,10 @@ async function deleteAlbumPhoto(id){
  if(!isAdmin)return;const p=albumPhotos.find(x=>x.id===id);if(!p)return;
  if(!confirm('¿Eliminar este momento? El archivo también se borrará permanentemente de la nube.'))return;
  try{
-  await removeStoredFile(p.image_url,'event-images');
   const {error}=await supabaseClient.from('album_photos').delete().eq('id',id);if(error)throw error;
   albumPhotos=albumPhotos.filter(x=>x.id!==id);renderAlbum();
- }catch(error){console.error(error);alert('No se pudo eliminar completamente el archivo. No se realizaron más cambios.')}
+  try{await removeStoredFile(p.image_url,'event-images')}catch(cleanErr){console.warn('El registro se eliminó, pero no se pudo limpiar el archivo',cleanErr);alert('El momento se eliminó del álbum, pero no se pudo borrar su archivo de Storage.')}
+ }catch(error){console.error(error);alert('No se pudo eliminar el momento del álbum.')}
 }
 
 function showUploadProgress(file){
@@ -696,10 +696,11 @@ async function deleteEvent(id){
  if(window.supabaseClient){
    try{
      const event=events.find(e=>e.id===id);const oldImage=event?.image_url||event?.image||'';
-     if(oldImage)await removeStoredFile(oldImage,'event-images');
      const {error}=await window.supabaseClient.from('events').delete().eq('id',id);
      if(error)throw error;
-     events=events.filter(e=>e.id!==id);renderEvents();return;
+     events=events.filter(e=>e.id!==id);renderEvents();
+     if(oldImage){try{await removeStoredFile(oldImage,'event-images')}catch(cleanErr){console.warn('El recuerdo se eliminó, pero no se pudo limpiar su imagen',cleanErr)}}
+     return;
    }catch(err){console.error(err);alert('No se pudo eliminar el recuerdo de Supabase.');return}
  }
  events=events.filter(e=>e.id!==id);persist();renderEvents();
