@@ -153,6 +153,7 @@ body.is-admin .admin-only{display:inline-flex!important}
 .upload-percent{font:700 18px Arial,sans-serif;color:var(--lilac-dark)}
 .upload-file{font:12px Arial,sans-serif;color:var(--muted);overflow-wrap:anywhere;margin-top:8px}
 
+.upload-overlay{position:fixed;inset:0;z-index:500;background:rgba(35,27,43,.72);display:none;align-items:center;justify-content:center;padding:24px}.upload-overlay.show{display:flex}.upload-box{width:min(420px,92vw);background:#fff;border-radius:22px;padding:24px;text-align:center;box-shadow:var(--shadow)}.upload-box h3{margin:0 0 8px}.upload-progress{height:12px;background:var(--lilac-soft);border-radius:999px;overflow:hidden;margin:18px 0 10px}.upload-progress>div{height:100%;width:0;background:var(--lilac);transition:width .2s ease}.upload-percent{font:700 20px Arial,sans-serif;color:var(--lilac-dark)}.upload-detail{font:12px Arial,sans-serif;color:var(--muted);margin-top:7px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
 </head>
@@ -166,6 +167,7 @@ body.is-admin .admin-only{display:inline-flex!important}
   <div class="upload-file" id="uploadFile"></div>
  </div>
 </div>
+<div id="uploadOverlay" class="upload-overlay"><div class="upload-box"><div class="eyebrow">Guardando nuestro momento</div><h3 id="uploadTitle">Subiendo archivo…</h3><div class="upload-progress"><div id="uploadBar"></div></div><div id="uploadPercent" class="upload-percent">0%</div><div id="uploadDetail" class="upload-detail">Preparando archivo…</div></div></div>
 <div class="app">
 <section class="screen hero active" id="home">
  <div class="screen-inner">
@@ -412,7 +414,7 @@ async function addAlbumMedia(){
    showUploadProgress(file);
    const image_url=await uploadEventImage(file);
    const {data,error}=await supabaseClient.from('album_photos').insert({title:title.trim()||'Nuestro momento',image_url,media_type,sort_order:albumPhotos.length}).select().single();
-   if(error)throw error;albumPhotos.push(data);renderAlbum();hideUploadProgress();
+   if(error)throw error;albumPhotos.push(data);renderAlbum();hideUploadProgress();hideUploadProgress();
   }catch(err){hideUploadProgress();console.error(err);alert('No se pudo agregar el archivo al álbum: '+(err?.message||'Error desconocido'))}
  });input.click();
 }
@@ -439,28 +441,39 @@ function updateUploadProgress(percent){
  document.getElementById('uploadPercent').textContent=p+'%';
 }
 function hideUploadProgress(){document.getElementById('uploadOverlay')?.classList.remove('open')}
+function setUploadProgress(percent,detail){
+ const overlay=document.getElementById('uploadOverlay'),bar=document.getElementById('uploadBar'),pct=document.getElementById('uploadPercent'),txt=document.getElementById('uploadDetail');
+ if(overlay)overlay.classList.add('show');const p=Math.max(0,Math.min(100,Math.round(percent||0)));
+ if(bar)bar.style.width=p+'%';if(pct)pct.textContent=p+'%';if(txt)txt.textContent=detail||'Subiendo…';
+}
+function hideUploadProgress(){document.getElementById('uploadOverlay')?.classList.remove('show')}
 async function uploadEventImage(file){
  if(!window.supabaseClient)throw new Error('Supabase no configurado');
  const ext=(file.name.split('.').pop()||'bin').toLowerCase();
  const path=`${crypto.randomUUID()}.${ext}`;
- if(file.type.startsWith('video/') || file.size>6*1024*1024){
+ const isVideo=file.type.startsWith('video/')||['mp4','mov','m4v','webm','avi'].includes(ext);
+ setUploadProgress(1,isVideo?'Preparando video…':'Preparando imagen…');
+ if(isVideo || file.size>6*1024*1024){
    if(!window.tus)throw new Error('No se pudo cargar el modulo de subida de videos.');
    const {data:{session}}=await window.supabaseClient.auth.getSession();
-   if(!session?.access_token)throw new Error('La sesión de administrador expiró.');
+   if(!session?.access_token)throw new Error('La sesion de administrador expiro.');
    await new Promise((resolve,reject)=>{
     const upload=new tus.Upload(file,{
      endpoint:'https://ehyctjjdaqgxphlewdwq.storage.supabase.co/storage/v1/upload/resumable',
      retryDelays:[0,3000,5000,10000,20000],
      headers:{authorization:`Bearer ${session.access_token}`,'x-upsert':'true'},
      uploadDataDuringCreation:true,removeFingerprintOnSuccess:true,chunkSize:6*1024*1024,
-     metadata:{bucketName:'event-images',objectName:path,contentType:file.type||'application/octet-stream',cacheControl:'3600'},
-     onProgress:(sent,total)=>updateUploadProgress(total?sent/total*100:0),onError:reject,onSuccess:()=>{updateUploadProgress(100);resolve()}
+     metadata:{bucketName:'event-images',objectName:path,contentType:file.type||'video/mp4',cacheControl:'3600'},
+     onError:reject,
+     onProgress:(sent,total)=>setUploadProgress(total?sent/total*100:0,`Subiendo ${(sent/1048576).toFixed(1)} de ${(total/1048576).toFixed(1)} MB`),
+     onSuccess:()=>{setUploadProgress(100,'Subida completada. Guardando en el album…');resolve()}
     });
     upload.findPreviousUploads().then(prev=>{if(prev.length)upload.resumeFromPreviousUpload(prev[0]);upload.start()}).catch(reject);
    });
  }else{
+   setUploadProgress(20,'Subiendo imagen…');
    const {error}=await window.supabaseClient.storage.from('event-images').upload(path,file,{upsert:true,contentType:file.type});
-   if(error)throw error;
+   if(error)throw error;setUploadProgress(100,'Subida completada.');
  }
  const {data}=window.supabaseClient.storage.from('event-images').getPublicUrl(path);
  return data.publicUrl;
