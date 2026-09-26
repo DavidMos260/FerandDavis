@@ -77,6 +77,11 @@ h3{margin-bottom:8px}
 .album{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .photo{aspect-ratio:1;border-radius:18px;background:linear-gradient(135deg,#eee5f8,#f8f3fb);display:flex;align-items:center;justify-content:center;color:var(--muted);overflow:hidden}
 .photo img{width:100%;height:100%;object-fit:cover}
+.album-item{position:relative;aspect-ratio:1;border-radius:18px;overflow:hidden;background:var(--lilac-soft)}
+.album-item img{width:100%;height:100%;object-fit:cover;display:block}
+.album-caption{position:absolute;left:0;right:0;bottom:0;padding:24px 12px 10px;background:linear-gradient(transparent,rgba(25,18,31,.72));color:#fff;font:600 13px Arial,sans-serif}
+.album-delete{position:absolute;right:9px;top:9px;border:0;border-radius:999px;background:rgba(255,255,255,.92);padding:7px 10px;font:700 11px Arial,sans-serif;color:var(--ink)}
+.album-empty{grid-column:1/-1;padding:32px;text-align:center;color:var(--muted)}
 .secret-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
 .secret{padding:22px;min-height:150px}
 .secret.locked{filter:saturate(.3)}
@@ -189,12 +194,9 @@ body.is-admin .admin-only{display:inline-flex!important}
 <section class="screen" id="album">
  <div class="screen-inner">
   <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
-  <div class="section-head"><div><div class="eyebrow">Nuestros momentos</div><h2>Álbum</h2><p class="subtitle">Una pequeña colección para no sobrecargar la historia.</p></div><button class="btn lilac" onclick="go('media')">＋ Agregar foto</button></div>
-  <div class="album">
-   <div class="photo">📸<br>&nbsp;Primera cita</div><div class="photo">🎂<br>&nbsp;Cumpleaños</div><div class="photo">❤️<br>&nbsp;Nuestra foto</div>
-   <div class="photo">🎄<br>&nbsp;Navidad</div><div class="photo">✈️<br>&nbsp;Viaje</div><div class="photo">✨<br>&nbsp;Momentos</div>
-  </div>
-  <div class="footer-note">Las fotografías reales se incorporarán en la siguiente fase.</div>
+  <div class="section-head"><div><div class="eyebrow">Nuestros momentos</div><h2>Álbum</h2><p class="subtitle">Una colección de nuestros momentos juntos.</p></div><button class="btn lilac admin-only" onclick="addAlbumPhoto()">＋ Agregar foto</button></div>
+  <div class="album" id="cloudAlbum"><div class="album-empty card">Cargando álbum…</div></div>
+  <div class="footer-note">Las fotografías se guardan en la nube y están disponibles en todos los dispositivos.</div>
  </div>
 </section>
 
@@ -397,6 +399,35 @@ async function initSupabase(){
    renderEvents();
  }
 }
+async function loadAlbum(){
+ const el=document.getElementById('cloudAlbum');
+ if(!el||!supabaseClient)return;
+ const {data,error}=await supabaseClient.from('album_photos').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:true});
+ if(error){console.error(error);el.innerHTML='<div class="album-empty card">No se pudo cargar el álbum.</div>';return}
+ albumPhotos=Array.isArray(data)?data:[];
+ renderAlbum();
+}
+function renderAlbum(){
+ const el=document.getElementById('cloudAlbum'); if(!el)return;
+ if(!albumPhotos.length){el.innerHTML='<div class="album-empty card">Todavía no hay fotografías en el álbum. ❤️</div>';return}
+ el.innerHTML=albumPhotos.map(p=>`<article class="album-item"><img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.title||'Fotografía')}"><div class="album-caption">${escapeHtml(p.title||'Nuestro momento')}</div><button class="album-delete admin-only" type="button" onclick="deleteAlbumPhoto(${p.id})">Eliminar</button></article>`).join('');
+}
+async function addAlbumPhoto(){
+ if(!isAdmin)return;
+ const input=document.createElement('input');input.type='file';input.accept='image/jpeg,image/png,image/webp,image/gif';input.className='file-hidden';document.body.appendChild(input);
+ input.addEventListener('change',async()=>{const file=input.files[0];input.remove();if(!file)return;
+  const title=prompt('Título de la fotografía:','Nuestro momento'); if(title===null)return;
+  try{const image_url=await uploadEventImage(file);const {data,error}=await supabaseClient.from('album_photos').insert({title:title.trim()||'Nuestro momento',image_url,sort_order:albumPhotos.length}).select().single();if(error)throw error;albumPhotos.push(data);renderAlbum()}
+  catch(err){console.error(err);alert('No se pudo agregar la fotografía al álbum.')}
+ }); input.click();
+}
+async function deleteAlbumPhoto(id){
+ if(!isAdmin||!confirm('¿Eliminar esta fotografía del álbum?'))return;
+ const {error}=await supabaseClient.from('album_photos').delete().eq('id',id);
+ if(error){console.error(error);alert('No se pudo eliminar la fotografía.');return}
+ albumPhotos=albumPhotos.filter(p=>p.id!==id);renderAlbum();
+}
+
 async function uploadEventImage(file){
  if(!window.supabaseClient)throw new Error('Supabase no configurado');
  const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
@@ -413,13 +444,13 @@ async function uploadEventImage(file){
 }
 
 const KEY_TODOS='fd_todos_v1';
-let events=[];
+let events=[];\nlet albumPhotos=[];
 let todos=JSON.parse(localStorage.getItem(KEY_TODOS)||'null')||[
- {id:1,text:'Tomar un café del Oxxo',done:false},{id:2,text:'Hacer un viaje juntos',done:false},
+ {id:2,text:'Hacer un viaje juntos',done:false},
  {id:3,text:'Ver un amanecer juntos',done:false},{id:4,text:'Ir a un concierto',done:false}
 ];
 function persist(){localStorage.setItem(KEY_TODOS,JSON.stringify(todos))}
-function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id)); if(id==='story')renderEvents();if(id==='todos')renderTodos();if(id==='secrets')renderSecrets()}
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id)); if(id==='story')renderEvents();if(id==='album')loadAlbum();if(id==='todos')renderTodos();if(id==='secrets')renderSecrets()}
 function fmt(d){return new Date(d+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})}
 function renderEvents(){
  const el=document.getElementById('timeline');
@@ -593,7 +624,7 @@ const SECRET_ITEMS=[
  {title:'El chocolate',text:'Un detalle pequeño puede terminar convertido en un recuerdo enorme.'},
  {title:'La sorpresa de cumpleaños',text:'Un cumpleaños que terminó significando mucho más de lo esperado.'},
  {title:'Nuestra foto',text:'Un instante que merece quedarse guardado para volver a verlo.'},
- {title:'El café del Oxxo',text:'A veces la historia perfecta no necesita una cafetería cara. 😂'},
+ {title:'Un momento inesperado',text:'Uno de esos pequeños momentos que terminan convirtiéndose en parte de nuestra historia.'},
  {title:'Nuestra canción',text:'Este espacio queda reservado para la canción que quieras que acompañe nuestra historia.'}
 ];
 function renderSecrets(){
