@@ -345,7 +345,11 @@ function setAdminState(session){
  if(inside)inside.style.display=isAdmin?'block':'none';
  if(label)label.textContent=isAdmin?'Sesión iniciada como '+(user.email||'administrador')+'.':'';
  if(status)status.textContent=user&&!isAdmin?'Esta cuenta no tiene permisos de administrador.':'';
+ const letter=document.getElementById('letterText');
+ if(letter)letter.readOnly=!isAdmin;
  renderEvents();
+ renderTodos();
+ renderAlbum();
 }
 async function adminLogin(){
  if(!supabaseClient)return;
