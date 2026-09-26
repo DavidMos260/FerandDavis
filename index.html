@@ -410,7 +410,8 @@ async function uploadEventImage(file){
  if(!window.supabaseClient)throw new Error('Supabase no configurado');
  const ext=(file.name.split('.').pop()||'bin').toLowerCase();
  const path=`${crypto.randomUUID()}.${ext}`;
- if(file.size>6*1024*1024 && window.tus){
+ if(file.type.startsWith('video/') || file.size>6*1024*1024){
+   if(!window.tus)throw new Error('No se pudo cargar el modulo de subida de videos.');
    const {data:{session}}=await window.supabaseClient.auth.getSession();
    if(!session?.access_token)throw new Error('La sesión de administrador expiró.');
    await new Promise((resolve,reject)=>{
