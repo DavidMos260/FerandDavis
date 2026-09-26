@@ -78,7 +78,7 @@ h3{margin-bottom:8px}
 .photo{aspect-ratio:1;border-radius:18px;background:linear-gradient(135deg,#eee5f8,#f8f3fb);display:flex;align-items:center;justify-content:center;color:var(--muted);overflow:hidden}
 .photo img{width:100%;height:100%;object-fit:cover}
 .album-item{position:relative;aspect-ratio:1;border-radius:18px;overflow:hidden;background:var(--lilac-soft)}
-.album-item img,.album-item video{width:100%;height:100%;object-fit:cover;display:block;background:#000}.album-fullscreen{position:absolute;right:9px;bottom:9px;z-index:4;border:0;border-radius:999px;background:rgba(255,255,255,.94);padding:8px 11px;font:700 12px Arial,sans-serif;color:var(--ink)}
+.album-item img,.album-item video{width:100%;height:100%;object-fit:cover;display:block;background:#000}.video-lightbox{position:fixed;inset:0;z-index:650;background:#000;display:none;align-items:center;justify-content:center}.video-lightbox.open{display:flex}.video-lightbox video{width:100%;height:100%;object-fit:contain;background:#000}.video-lightbox-close{position:absolute;right:16px;top:16px;z-index:3;border:0;border-radius:999px;background:rgba(255,255,255,.92);width:46px;height:46px;font:700 22px Arial,sans-serif;color:#222}.album-fullscreen{position:absolute;right:9px;bottom:9px;z-index:4;border:0;border-radius:999px;background:rgba(255,255,255,.94);padding:8px 11px;font:700 12px Arial,sans-serif;color:var(--ink)}
 .album-caption{position:absolute;left:0;right:0;bottom:0;padding:24px 12px 10px;background:linear-gradient(transparent,rgba(25,18,31,.72));color:#fff;font:600 13px Arial,sans-serif}
 .album-delete{position:absolute;right:9px;top:9px;border:0;border-radius:999px;background:rgba(255,255,255,.92);padding:7px 10px;font:700 11px Arial,sans-serif;color:var(--ink)}
 .album-empty{grid-column:1/-1;padding:32px;text-align:center;color:var(--muted)}
@@ -169,6 +169,7 @@ body.is-admin .admin-only{display:inline-flex!important}
   <div class="upload-file" id="uploadFile"></div>
  </div>
 </div>
+<div id="videoLightbox" class="video-lightbox" aria-hidden="true"><button class="video-lightbox-close" type="button" onclick="closeVideoFullscreen()" aria-label="Cerrar video">×</button><video id="fullscreenVideo" controls playsinline></video></div>
 <div class="app">
 <section class="screen hero active" id="home">
  <div class="screen-inner">
@@ -406,17 +407,25 @@ function renderAlbum(){
  }).join('');
 }
 async function openVideoFullscreen(id){
- const video=document.getElementById(id);if(!video)return;
+ const source=document.getElementById(id),box=document.getElementById('videoLightbox'),player=document.getElementById('fullscreenVideo');
+ if(!source||!box||!player)return;
+ player.src=source.currentSrc||source.src;
+ try{player.currentTime=source.currentTime||0}catch(e){}
+ box.classList.add('open');box.setAttribute('aria-hidden','false');
+ try{await player.play()}catch(e){}
  try{
-  if(video.requestFullscreen){await video.requestFullscreen();return}
-  if(video.webkitRequestFullscreen){video.webkitRequestFullscreen();return}
-  if(video.webkitEnterFullscreen){video.webkitEnterFullscreen();return}
-  throw new Error('fullscreen unsupported');
- }catch(err){
-  try{video.controls=true;await video.play();if(video.webkitEnterFullscreen)video.webkitEnterFullscreen()}
-  catch(e){console.error(e);alert('Tu navegador no permitió abrir el video en pantalla completa.')}
- }
+  if(box.requestFullscreen)await box.requestFullscreen();
+  else if(box.webkitRequestFullscreen)box.webkitRequestFullscreen();
+  else if(player.webkitEnterFullscreen)player.webkitEnterFullscreen();
+ }catch(e){}
 }
+function closeVideoFullscreen(){
+ const box=document.getElementById('videoLightbox'),player=document.getElementById('fullscreenVideo');
+ if(player){player.pause();player.removeAttribute('src');player.load()}
+ if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});
+ if(box){box.classList.remove('open');box.setAttribute('aria-hidden','true')}
+}
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement){const box=document.getElementById('videoLightbox');if(box?.classList.contains('open'))closeVideoFullscreen()}});
 async function addAlbumMedia(){
  if(!isAdmin)return;
  const input=document.createElement('input');input.type='file';input.accept='image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime';input.className='file-hidden';document.body.appendChild(input);
