@@ -256,7 +256,7 @@ body.is-admin .admin-only{display:inline-flex!important}
   </div>
   <div id="adminLoggedIn" style="display:none">
    <h3>Modo administrador</h3><p id="adminUserLabel">Sesión iniciada.</p>
-   <div class="music-admin"><strong>Música del sitio</strong><p class="music-note">Sube la canción que sonará en el reproductor.</p><input class="admin-only" id="musicFile" type="file" accept="audio/mpeg,audio/mp4,audio/aac,.mp3,.m4a"><button class="btn lilac small admin-only" type="button" onclick="uploadSiteMusic()">Subir canción</button><div id="musicAdminStatus" class="admin-status"></div></div>
+   
    <button class="btn ghost small" type="button" onclick="adminLogout()">Cerrar sesión</button>
   </div>
   <div class="admin-status" id="adminStatus"></div>
@@ -780,16 +780,6 @@ async function playPauseMusic(){
 }
 function skipMusic(seconds){const a=document.getElementById('siteAudio');if(!a?.duration)return;a.currentTime=Math.max(0,Math.min(a.duration,a.currentTime+seconds))}
 function toggleMute(){const a=document.getElementById('siteAudio');if(!a)return;a.muted=!a.muted;document.getElementById('musicMute').textContent=a.muted?'🔇':'🔊'}
-async function uploadSiteMusic(){
- if(!isAdmin)return;const input=document.getElementById('musicFile'),file=input?.files?.[0],status=document.getElementById('musicAdminStatus');
- if(!file){status.textContent='Selecciona un archivo de audio.';return}
- try{status.textContent='Subiendo canción…';const ext=(file.name.split('.').pop()||'mp3').toLowerCase();const path='main.'+ext;
- const {error}=await supabaseClient.storage.from('site-music').upload(path,file,{upsert:true,contentType:file.type||'audio/mpeg',cacheControl:'3600'});if(error)throw error;
- const {data}=supabaseClient.storage.from('site-music').getPublicUrl(path);const url=data.publicUrl+'?v='+Date.now();
- const {error:dbError}=await supabaseClient.from('site_music').upsert({id:1,title:'Te quiero tanto',artist:'Kevin Kaarl',audio_url:url,updated_at:new Date().toISOString()});if(dbError)throw dbError;
- status.textContent='Canción guardada correctamente.';await loadSiteMusic();
- }catch(e){console.error(e);status.textContent='No se pudo subir: '+(e?.message||'error desconocido')}
-}
 const audioEl=document.getElementById('siteAudio');
 if(audioEl){audioEl.volume=.8;
  audioEl.addEventListener('timeupdate',()=>{const p=audioEl.duration?audioEl.currentTime/audioEl.duration*100:0;document.getElementById('musicProgress').style.width=p+'%';document.getElementById('musicCurrent').textContent=fmtTime(audioEl.currentTime);document.getElementById('musicDuration').textContent=fmtTime(audioEl.duration)});
