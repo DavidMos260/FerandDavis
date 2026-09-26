@@ -129,6 +129,15 @@ video.media-preview{aspect-ratio:16/9}
 .event .event-placeholder{width:100%;height:180px;border-radius:16px;background:var(--lilac-soft);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:44px}
 .image-help{font:12px Arial,sans-serif;color:var(--muted);line-height:1.45}
 .file-hidden{display:none}
+.admin-only{display:none!important}
+body.is-admin .admin-only{display:inline-flex!important}
+.admin-access{position:fixed;left:18px;bottom:18px;z-index:55}
+.admin-toggle{border:1px solid var(--line);background:rgba(255,255,255,.92);color:var(--muted);border-radius:999px;padding:9px 13px;font:600 11px Arial,sans-serif;box-shadow:var(--shadow)}
+.admin-panel{position:absolute;left:0;bottom:48px;width:min(330px,calc(100vw - 36px));padding:17px;display:none}
+.admin-panel.open{display:block}
+.admin-panel h3{margin-bottom:6px}.admin-panel p{font:12px Arial,sans-serif;color:var(--muted);line-height:1.45}
+.admin-form{display:grid;gap:9px}.admin-form input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;outline:none}
+.admin-status{font:12px Arial,sans-serif;color:var(--muted);margin-top:9px}
 
 </style>
 </head>
@@ -149,7 +158,7 @@ video.media-preview{aspect-ratio:16/9}
   <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('home')">← Inicio</button></div>
   <div class="section-head">
    <div><div class="eyebrow">Capítulo 01</div><h2>Nuestra historia</h2><p class="subtitle">Desde el 29 de agosto de 2025.</p></div>
-   <button class="btn lilac" onclick="openEvent()">＋ Agregar recuerdo</button>
+   <button class="btn lilac admin-only" onclick="openEvent()">＋ Agregar recuerdo</button>
   </div>
   <div id="timeline" class="timeline"></div>
   <div class="actions">
@@ -254,6 +263,25 @@ video.media-preview{aspect-ratio:16/9}
   </div>
  </div>
 </section>
+
+<div class="admin-access">
+ <div class="admin-panel card" id="adminPanel">
+  <div id="adminLoggedOut">
+   <h3>Administración</h3><p>Inicia sesión para editar Nuestra historia.</p>
+   <div class="admin-form">
+    <input type="email" id="adminEmail" autocomplete="username" placeholder="Correo">
+    <input type="password" id="adminPassword" autocomplete="current-password" placeholder="Contraseña">
+    <button class="btn lilac" type="button" onclick="adminLogin()">Entrar</button>
+   </div>
+  </div>
+  <div id="adminLoggedIn" style="display:none">
+   <h3>Modo administrador</h3><p id="adminUserLabel">Sesión iniciada.</p>
+   <button class="btn ghost small" type="button" onclick="adminLogout()">Cerrar sesión</button>
+  </div>
+  <div class="admin-status" id="adminStatus"></div>
+ </div>
+ <button class="admin-toggle" type="button" onclick="toggleAdminPanel()">⚙ Administrar</button>
+</div>
 
 <div class="music">
  <div class="music-panel card" id="musicPanel">
@@ -360,7 +388,7 @@ function renderEvents(){
      <div class="event-grid">
        <div class="story-image-wrap">
          ${media}
-         <div class="story-image-actions">
+         <div class="story-image-actions admin-only">
            <button class="story-image-btn" type="button" onclick="changeEventImage(${e.id})">🖼️ ${image?'Cambiar':'Agregar'} imagen</button>
          </div>
        </div>
