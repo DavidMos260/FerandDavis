@@ -146,6 +146,7 @@ body.is-admin .admin-only{display:inline-flex!important}
 .admin-status{font:12px Arial,sans-serif;color:var(--muted);margin-top:9px}
 
 </style>
+<script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
 </head>
 <body>
 <div class="app">
@@ -407,19 +408,29 @@ async function deleteAlbumPhoto(id){
 
 async function uploadEventImage(file){
  if(!window.supabaseClient)throw new Error('Supabase no configurado');
- const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+ const ext=(file.name.split('.').pop()||'bin').toLowerCase();
  const path=`${crypto.randomUUID()}.${ext}`;
- const {error:uploadError}=await window.supabaseClient.storage.from('event-images').upload(path,file,{upsert:true,contentType:file.type});
- if(uploadError){
-   if(String(uploadError.message||'').toLowerCase().includes('bucket')){
-     throw new Error('Falta crear el bucket público "event-images" en Supabase Storage.');
-   }
-   throw uploadError;
+ if(file.size>6*1024*1024 && window.tus){
+   const {data:{session}}=await window.supabaseClient.auth.getSession();
+   if(!session?.access_token)throw new Error('La sesión de administrador expiró.');
+   await new Promise((resolve,reject)=>{
+    const upload=new tus.Upload(file,{
+     endpoint:'https://ehyctjjdaqgxphlewdwq.storage.supabase.co/storage/v1/upload/resumable',
+     retryDelays:[0,3000,5000,10000,20000],
+     headers:{authorization:`Bearer ${session.access_token}`,'x-upsert':'true'},
+     uploadDataDuringCreation:true,removeFingerprintOnSuccess:true,chunkSize:6*1024*1024,
+     metadata:{bucketName:'event-images',objectName:path,contentType:file.type||'application/octet-stream',cacheControl:'3600'},
+     onError:reject,onSuccess:resolve
+    });
+    upload.findPreviousUploads().then(prev=>{if(prev.length)upload.resumeFromPreviousUpload(prev[0]);upload.start()}).catch(reject);
+   });
+ }else{
+   const {error}=await window.supabaseClient.storage.from('event-images').upload(path,file,{upsert:true,contentType:file.type});
+   if(error)throw error;
  }
  const {data}=window.supabaseClient.storage.from('event-images').getPublicUrl(path);
  return data.publicUrl;
 }
-
 let events=[];
 let albumPhotos=[];
 let todos=[];
