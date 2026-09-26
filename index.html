@@ -444,7 +444,8 @@ async function uploadEventImage(file){
 }
 
 const KEY_TODOS='fd_todos_v1';
-let events=[];\nlet albumPhotos=[];
+let events=[];
+let albumPhotos=[];
 let todos=JSON.parse(localStorage.getItem(KEY_TODOS)||'null')||[
  {id:2,text:'Hacer un viaje juntos',done:false},
  {id:3,text:'Ver un amanecer juntos',done:false},{id:4,text:'Ir a un concierto',done:false}
