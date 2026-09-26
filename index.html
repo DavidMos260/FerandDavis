@@ -78,7 +78,7 @@ h3{margin-bottom:8px}
 .photo{aspect-ratio:1;border-radius:18px;background:linear-gradient(135deg,#eee5f8,#f8f3fb);display:flex;align-items:center;justify-content:center;color:var(--muted);overflow:hidden}
 .photo img{width:100%;height:100%;object-fit:cover}
 .album-item{position:relative;aspect-ratio:1;border-radius:18px;overflow:hidden;background:var(--lilac-soft)}
-.album-item img,.album-item video{width:100%;height:100%;object-fit:cover;display:block;background:#000}
+.album-item img,.album-item video{width:100%;height:100%;object-fit:cover;display:block;background:#000}.album-fullscreen{position:absolute;right:9px;bottom:9px;z-index:4;border:0;border-radius:999px;background:rgba(255,255,255,.94);padding:8px 11px;font:700 12px Arial,sans-serif;color:var(--ink)}
 .album-caption{position:absolute;left:0;right:0;bottom:0;padding:24px 12px 10px;background:linear-gradient(transparent,rgba(25,18,31,.72));color:#fff;font:600 13px Arial,sans-serif}
 .album-delete{position:absolute;right:9px;top:9px;border:0;border-radius:999px;background:rgba(255,255,255,.92);padding:7px 10px;font:700 11px Arial,sans-serif;color:var(--ink)}
 .album-empty{grid-column:1/-1;padding:32px;text-align:center;color:var(--muted)}
@@ -400,10 +400,22 @@ function renderAlbum(){
  el.innerHTML=albumPhotos.map(p=>{
   const type=p.media_type==='video'?'video':'image';
   const media=type==='video'
-   ? `<video src="${escapeHtml(p.image_url)}" controls playsinline preload="metadata"></video>`
+   ? `<video id="albumVideo${p.id}" src="${escapeHtml(p.image_url)}" controls playsinline preload="metadata"></video><button class="album-fullscreen" type="button" onclick="openVideoFullscreen('albumVideo${p.id}')" aria-label="Ver video en pantalla completa">⛶</button>`
    : `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.title||'Fotografía')}">`;
   return `<article class="album-item">${media}<div class="album-caption">${escapeHtml(p.title||'Nuestro momento')}</div><button class="album-delete admin-only" type="button" onclick="deleteAlbumPhoto(${p.id})">Eliminar</button></article>`;
  }).join('');
+}
+async function openVideoFullscreen(id){
+ const video=document.getElementById(id);if(!video)return;
+ try{
+  if(video.requestFullscreen){await video.requestFullscreen();return}
+  if(video.webkitRequestFullscreen){video.webkitRequestFullscreen();return}
+  if(video.webkitEnterFullscreen){video.webkitEnterFullscreen();return}
+  throw new Error('fullscreen unsupported');
+ }catch(err){
+  try{video.controls=true;await video.play();if(video.webkitEnterFullscreen)video.webkitEnterFullscreen()}
+  catch(e){console.error(e);alert('Tu navegador no permitió abrir el video en pantalla completa.')}
+ }
 }
 async function addAlbumMedia(){
  if(!isAdmin)return;
