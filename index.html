@@ -255,7 +255,7 @@ body.is-admin .admin-only{display:inline-flex!important}
    <div class="eyebrow">El final... por ahora</div>
    <h2>Fer, tengo algo que decirte.</h2>
    <p>Esta carta está sincronizada en la nube. Solo puede modificarse desde el modo administrador.</p>
-   <textarea id="letterText" placeholder="Escribe aquí tu carta..." readonly></textarea>
+   <textarea id="letterText" placeholder="Escribe aquí tu carta..."></textarea>
    <div class="letter-toolbar admin-only">
     <button class="btn lilac" onclick="saveLetter()">Guardar carta</button>
     <button class="btn ghost" onclick="clearLetter()">Borrar</button>
@@ -346,7 +346,7 @@ function setAdminState(session){
  if(label)label.textContent=isAdmin?'Sesión iniciada como '+(user.email||'administrador')+'.':'';
  if(status)status.textContent=user&&!isAdmin?'Esta cuenta no tiene permisos de administrador.':'';
  const letter=document.getElementById('letterText');
- if(letter)letter.readOnly=!isAdmin;
+ if(letter){letter.readOnly=false;letter.disabled=false;}
  renderEvents();
  renderTodos();
  renderAlbum();
