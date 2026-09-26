@@ -2,86 +2,579 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fer & Davis</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>body{font-family:system-ui,sans-serif;background:#f4efff;color:#2d2340;margin:0;padding:24px}main{max-width:760px;margin:auto}button,input,textarea{font:inherit}article{background:#fff;padding:16px;border-radius:16px;margin:12px 0}img{max-width:100%;border-radius:14px}.actions{display:flex;gap:8px;flex-wrap:wrap}.modal{display:none;position:fixed;inset:0;background:#0007;align-items:center;justify-content:center;padding:20px}.modal.open{display:flex}.box{background:#fff;max-width:520px;width:100%;padding:20px;border-radius:18px}.box input,.box textarea{width:100%;box-sizing:border-box;margin:6px 0 12px;padding:10px}</style>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#8f72b8">
+<title>Fer & Davis 💜</title>
+<style>
+:root{
+  --lilac:#a98bd0; --lilac-dark:#76559f; --lilac-soft:#eee7f8;
+  --ink:#332b3d; --muted:#746b7d; --white:#fff; --line:#e4dced;
+  --shadow:0 18px 50px rgba(72,48,94,.14);
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;font-family:Georgia,"Times New Roman",serif;color:var(--ink);background:#faf8fc}
+body{overflow:hidden}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.app{width:100%;height:100dvh;position:relative;overflow:hidden}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;transform:translateX(24px);pointer-events:none;transition:opacity .35s ease,transform .35s ease}
+.screen.active{opacity:1;transform:none;pointer-events:auto}
+.screen-inner{width:min(1080px,92vw);height:100%;margin:auto;padding:26px 0 88px;display:flex;flex-direction:column;overflow:auto;scrollbar-width:none}
+.screen-inner::-webkit-scrollbar{display:none}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:clamp(48px,10vw,100px);line-height:.92;margin-bottom:14px}
+h2{font-size:clamp(32px,6vw,54px);margin-bottom:8px}
+h3{margin-bottom:8px}
+.subtitle{font-size:clamp(18px,3vw,24px);color:var(--muted)}
+.eyebrow{text-transform:uppercase;letter-spacing:.18em;font:600 12px/1.2 Arial,sans-serif;color:var(--lilac-dark)}
+.btn{border:0;border-radius:999px;padding:13px 20px;background:var(--ink);color:#fff;box-shadow:0 10px 25px rgba(51,43,61,.16);transition:.2s}
+.btn:hover{transform:translateY(-2px)}
+.btn.lilac{background:var(--lilac-dark)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);box-shadow:none}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+.brand{font:700 16px Arial,sans-serif;letter-spacing:.08em}
+.back{background:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 14px;color:var(--ink)}
+.card{background:rgba(255,255,255,.88);border:1px solid rgba(228,220,237,.9);border-radius:24px;box-shadow:var(--shadow)}
+.hero{background:radial-gradient(circle at 20% 20%,#f6effd,transparent 38%),radial-gradient(circle at 80% 80%,#e9ddf7,transparent 35%),#faf8fc}
+.hero .screen-inner{justify-content:center;align-items:center;text-align:center;position:relative}
+.hero-heart{font-size:30px;color:var(--lilac-dark);margin:8px 0 25px;animation:pulse 2.5s infinite}
+.hero-date{font:600 13px Arial,sans-serif;letter-spacing:.2em;color:var(--muted);margin-bottom:28px}
+.hero .btn{padding:15px 28px}
+.music{position:fixed;right:18px;bottom:18px;z-index:50}
+.music-toggle{width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:#fff;box-shadow:var(--shadow);color:var(--lilac-dark);font-size:18px}
+.music-panel{position:absolute;right:0;bottom:58px;width:270px;padding:15px;display:none}
+.music-panel.open{display:block}
+.music-title{font:700 14px Arial,sans-serif}
+.music-artist{font:12px Arial,sans-serif;color:var(--muted);margin:4px 0 12px}
+.fake-player{height:5px;background:var(--line);border-radius:5px;position:relative;margin-bottom:10px}
+.fake-player span{display:block;width:24%;height:100%;background:var(--lilac-dark);border-radius:5px}
+.music-note{font:12px Arial,sans-serif;color:var(--muted)}
+.timeline{position:relative;padding-left:22px}
+.timeline:before{content:"";position:absolute;left:7px;top:5px;bottom:5px;width:2px;background:var(--line)}
+.event{position:relative;margin:0 0 18px;padding:20px 20px 20px 22px}
+.event:before{content:"";position:absolute;left:-21px;top:25px;width:12px;height:12px;background:var(--lilac);border:4px solid #faf8fc;border-radius:50%}
+.event-grid{display:grid;grid-template-columns:180px 1fr;gap:20px;align-items:center}
+.event img{width:100%;height:130px;object-fit:cover;border-radius:16px;background:var(--lilac-soft)}
+.event-date{font:700 12px Arial,sans-serif;color:var(--lilac-dark);letter-spacing:.06em}
+.event p{color:var(--muted);line-height:1.55;margin-bottom:0}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.small{padding:8px 11px;font:600 12px Arial,sans-serif;border-radius:999px}
+.empty{padding:35px;text-align:center;color:var(--muted)}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:20px}
+.oxxo{min-height:calc(100dvh - 120px);align-items:center;justify-content:center;text-align:center}
+.oxxo-card{padding:42px 30px;max-width:700px}
+.cup{font-size:70px;margin-bottom:12px}
+.quote{font-size:clamp(28px,5vw,48px);font-weight:700;margin:20px 0}
+.list{display:grid;gap:10px}
+.todo{display:flex;align-items:center;gap:12px;padding:15px 16px}
+.todo input{width:20px;height:20px;accent-color:var(--lilac-dark)}
+.todo span{flex:1}
+.todo.done span{text-decoration:line-through;color:#999}
+.progress-wrap{height:9px;background:var(--line);border-radius:9px;overflow:hidden;margin:8px 0 18px}
+.progress{height:100%;background:var(--lilac-dark);width:0%;transition:.3s}
+.add-row{display:flex;gap:8px;margin-bottom:16px}
+.add-row input{flex:1;border:1px solid var(--line);border-radius:999px;padding:12px 15px;outline:none}
+.album{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.photo{aspect-ratio:1;border-radius:18px;background:linear-gradient(135deg,#eee5f8,#f8f3fb);display:flex;align-items:center;justify-content:center;color:var(--muted);overflow:hidden}
+.photo img{width:100%;height:100%;object-fit:cover}
+.secret-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.secret{padding:22px;min-height:150px}
+.secret.locked{filter:saturate(.3)}
+.secret button{margin-top:10px}
+.letter{max-width:760px;margin:auto;padding:38px}
+.letter p{line-height:1.8;color:#5e5666}
+.footer-note{text-align:center;color:var(--muted);font:12px Arial,sans-serif;margin-top:auto;padding-top:20px}
+.modal{position:fixed;inset:0;background:rgba(35,26,43,.45);z-index:100;display:none;align-items:center;justify-content:center;padding:18px}
+.modal.open{display:flex}
+.modal-card{width:min(560px,100%);padding:24px}
+.form{display:grid;gap:12px}
+.form label{font:600 12px Arial,sans-serif;color:var(--muted)}
+.form input,.form textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:14px;outline:none;background:#fff}
+.form textarea{min-height:110px;resize:vertical}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+@keyframes pulse{50%{transform:scale(1.12)}}
+@media(max-width:650px){
+ .screen-inner{width:90vw;padding-top:18px}
+ .event-grid{grid-template-columns:1fr}
+ .event img{height:190px}
+ .album{grid-template-columns:repeat(2,1fr)}
+ .secret-grid{grid-template-columns:1fr}
+ .section-head{align-items:start;flex-direction:column}
+}
+
+/* V2 */
+.hero-badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:4px 0 18px}
+.badge{padding:7px 11px;border-radius:999px;background:#fff;border:1px solid var(--line);font:600 11px Arial,sans-serif;color:var(--muted)}
+.v2-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.media-card{padding:18px}
+.media-card h3{margin-bottom:6px}
+.media-card p{color:var(--muted);line-height:1.5}
+.media-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.media-preview{width:100%;max-height:360px;object-fit:contain;border-radius:16px;background:var(--lilac-soft);display:block}
+video.media-preview{aspect-ratio:16/9}
+.audio-player{width:100%;margin-top:10px}
+.secret.revealed{background:linear-gradient(135deg,#fff,#f2eafb)}
+.secret .secret-body{color:var(--muted);line-height:1.55}
+.reveal-btn{margin-top:8px}
+.letter textarea{width:100%;min-height:260px;border:1px solid var(--line);border-radius:16px;padding:15px;resize:vertical;outline:none}
+.letter-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.status{font:12px Arial,sans-serif;color:var(--muted);margin-top:8px}
+@media(max-width:650px){.v2-grid{grid-template-columns:1fr}.media-card{padding:15px}}
+
+
+.story-image-wrap{position:relative}
+.story-image-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.story-image-btn{font:600 11px Arial,sans-serif;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+.event .event-photo{width:100%;height:180px;object-fit:cover;border-radius:16px;background:var(--lilac-soft);display:block}
+.event .event-placeholder{width:100%;height:180px;border-radius:16px;background:var(--lilac-soft);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:44px}
+.image-help{font:12px Arial,sans-serif;color:var(--muted);line-height:1.45}
+.file-hidden{display:none}
+
+</style>
 </head>
 <body>
-<main>
-<h1>Fer & Davis</h1>
-<h2>Nuestra historia</h2>
-<button onclick="openEvent()">Agregar recuerdo</button>
-<div id="timeline"></div>
-</main>
-<div id="modal" class="modal"><div class="box">
-<h3 id="modalTitle">Nuevo recuerdo</h3>
-<label>Fecha</label><input id="eventDate" type="date">
-<label>Título</label><input id="eventTitle">
-<label>Descripción</label><textarea id="eventDesc"></textarea>
-<label>Imagen</label><input id="eventImage" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
-<div class="actions"><button onclick="saveEvent()">Guardar</button><button onclick="closeEvent()">Cancelar</button></div>
-</div></div>
+<div class="app">
+<section class="screen hero active" id="home">
+ <div class="screen-inner">
+  <div class="eyebrow">29.08.2025 — ∞</div>
+  <h1>Fer &amp; Davis</h1>
+  <p class="subtitle">Nuestra historia</p>
+  <div class="hero-heart">♥</div>
+  <button class="btn lilac" onclick="go('story')">Comenzar</button>
+ </div>
+</section>
+
+<section class="screen" id="story">
+ <div class="screen-inner">
+  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('home')">← Inicio</button></div>
+  <div class="section-head">
+   <div><div class="eyebrow">Capítulo 01</div><h2>Nuestra historia</h2><p class="subtitle">Desde el 29 de agosto de 2025.</p></div>
+   <button class="btn lilac" onclick="openEvent()">＋ Agregar recuerdo</button>
+  </div>
+  <div id="timeline" class="timeline"></div>
+  <div class="actions">
+   <button class="btn ghost" onclick="go('album')">📸 Ver álbum</button>
+   <button class="btn ghost" onclick="go('todos')">☑ Nuestra lista</button>
+    <button class="btn ghost" onclick="go('media')">🎞️ Multimedia</button>
+    <button class="btn ghost" onclick="go('secrets')">🔐 Recuerdos</button>
+  </div>
+ </div>
+</section>
+
+
+<section class="screen" id="todos">
+ <div class="screen-inner">
+  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
+  <div class="section-head"><div><div class="eyebrow">Capítulo 02</div><h2>Nuestra lista</h2><p class="subtitle">Cosas que todavía nos faltan vivir juntos.</p></div></div>
+  <div class="card" style="padding:18px">
+   <div class="add-row"><input id="todoInput" placeholder="Agregar algo que quieran hacer juntos..."><button class="btn lilac" onclick="addTodo()">＋</button></div>
+   <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+   <div id="todoCount" class="music-note"></div>
+   <div id="todosList" class="list"></div>
+  </div>
+  <div class="footer-note">El progreso se guarda en este dispositivo en esta primera versión.</div>
+ </div>
+</section>
+
+<section class="screen" id="album">
+ <div class="screen-inner">
+  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
+  <div class="section-head"><div><div class="eyebrow">Nuestros momentos</div><h2>Álbum</h2><p class="subtitle">Una pequeña colección para no sobrecargar la historia.</p></div><button class="btn lilac" onclick="go('media')">＋ Agregar foto</button></div>
+  <div class="album">
+   <div class="photo">📸<br>&nbsp;Primera cita</div><div class="photo">🎂<br>&nbsp;Cumpleaños</div><div class="photo">❤️<br>&nbsp;Nuestra foto</div>
+   <div class="photo">🎄<br>&nbsp;Navidad</div><div class="photo">✈️<br>&nbsp;Viaje</div><div class="photo">✨<br>&nbsp;Momentos</div>
+  </div>
+  <div class="footer-note">Las fotografías reales se incorporarán en la siguiente fase.</div>
+ </div>
+</section>
+
+
+<section class="screen" id="media">
+ <div class="screen-inner">
+  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
+  <div class="section-head">
+   <div><div class="eyebrow">Capítulo 02.5</div><h2>Multimedia</h2><p class="subtitle">Aquí puedes incorporar las fotos, el video y la canción cuando tengas los archivos.</p></div>
+  </div>
+  <div class="v2-grid">
+   <article class="card media-card">
+    <div class="eyebrow">Álbum real</div><h3>📸 Fotografías</h3>
+    <p>Selecciona imágenes desde tu dispositivo. Se mostrarán en esta sesión sin alterar la estructura de la página.</p>
+    <input id="photoInput" type="file" accept="image/*" multiple>
+    <div id="photoStatus" class="status">Aún no has seleccionado fotografías.</div>
+    <div id="photoAlbum" class="album" style="margin-top:12px"></div>
+   </article>
+   <article class="card media-card">
+    <div class="eyebrow">Video</div><h3>🎥 Cumpleaños</h3>
+    <p>Selecciona el video real del cumpleaños para reproducirlo aquí.</p>
+    <input id="videoInput" type="file" accept="video/*">
+    <div id="videoStatus" class="status">Aún no has seleccionado un video.</div>
+    <video id="videoPlayer" class="media-preview" controls playsinline style="display:none;margin-top:12px"></video>
+   </article>
+   <article class="card media-card">
+    <div class="eyebrow">Música</div><h3>🎵 Te quiero tanto</h3>
+    <p>Selecciona el archivo de audio que quieras utilizar como canción de la página.</p>
+    <input id="audioInput" type="file" accept="audio/*">
+    <div id="audioStatus" class="status">Aún no has seleccionado una canción.</div>
+    <audio id="audioPlayer" class="audio-player" controls style="display:none"></audio>
+   </article>
+   <article class="card media-card">
+    <div class="eyebrow">Siguiente paso</div><h3>☁️ Compartir entre dispositivos</h3>
+    <p>La sincronización en la nube y el inicio de sesión requieren un servicio externo. Esta versión no finge tener sincronización cuando todavía no existe.</p>
+    <div class="media-actions"><button class="btn ghost" onclick="alert('La base está preparada. Para sincronización real necesitaremos conectar un backend o servicio de almacenamiento.')">Ver estado</button></div>
+   </article>
+  </div>
+ </div>
+</section>
+
+<section class="screen" id="secrets">
+ <div class="screen-inner">
+  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
+  <div class="eyebrow">Capítulo 03</div><h2>10 cosas que quiero que recuerdes</h2>
+  <p class="subtitle">Toca cada recuerdo para descubrirlo.</p>
+  <div class="secret-grid" id="secretGrid"></div>
+  <div class="actions"><button class="btn lilac" onclick="go('letter')">💌 Ir a la carta</button></div>
+ </div>
+</section>
+
+<section class="screen" id="letter">
+ <div class="screen-inner">
+  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('secrets')">← Volver</button></div>
+  <div class="card letter">
+   <div class="eyebrow">El final... por ahora</div>
+   <h2>Fer, tengo algo que decirte.</h2>
+   <p>Esta carta queda editable para que puedas escribir tus propias palabras. Se guarda en este dispositivo.</p>
+   <textarea id="letterText" placeholder="Escribe aquí tu carta..."></textarea>
+   <div class="letter-toolbar">
+    <button class="btn lilac" onclick="saveLetter()">Guardar carta</button>
+    <button class="btn ghost" onclick="clearLetter()">Borrar</button>
+   </div>
+   <div id="letterStatus" class="status"></div>
+   <p style="font-style:italic;margin-top:24px">“Y esta página termina aquí... pero nuestra historia no.”</p>
+   <div style="text-align:center;font-size:28px;color:var(--lilac-dark)">♥</div>
+  </div>
+ </div>
+</section>
+
+<div class="music">
+ <div class="music-panel card" id="musicPanel">
+  <div class="music-title">Te quiero tanto</div><div class="music-artist">Kevin Kaarl</div>
+  <div class="fake-player"><span></span></div>
+  <div class="music-note">Reproductor visual de prueba. La canción real se conectará en la siguiente fase.</div>
+ </div>
+ <button class="music-toggle" onclick="toggleMusic()">▶</button>
+</div>
+
+<div class="modal" id="eventModal">
+ <div class="modal-card card">
+  <h3 id="modalTitle">Agregar recuerdo</h3>
+  <div class="form">
+   <div><label>Fecha</label><input type="date" id="eventDate"></div>
+   <div><label>Título</label><input id="eventTitle" placeholder="Ej. Nuestra primera cita"></div>
+   <div><label>Descripción</label><textarea id="eventDesc" placeholder="Un pequeño recuerdo..."></textarea></div>
+   <div>
+    <label>Imagen del recuerdo</label>
+    <input type="file" id="eventImage" accept="image/jpeg,image/png,image/webp,image/gif">
+    <div id="eventImagePreviewWrap" style="display:none;margin-top:12px">
+     <img id="eventImagePreview" alt="Vista previa del recuerdo" style="width:100%;max-height:280px;object-fit:cover;border-radius:16px">
+    </div>
+   </div>
+  </div>
+  <div class="modal-actions"><button class="btn ghost" onclick="closeEvent()">Cancelar</button><button class="btn lilac" onclick="saveEvent()">Guardar</button></div>
+ </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+/* Supabase
+   Proyecto conectado: DavidMos260's Project.
+   “Nuestra historia” lee, crea, edita y elimina recuerdos directamente en public.events.
+   Los recuerdos no usan localStorage.
+*/
 const SUPABASE_URL='https://ehyctjjdaqgxphlewdwq.supabase.co';
 const SUPABASE_ANON_KEY='sb_publishable_tJ-EEvB5KirznaGNFujxuQ__RkuI1ad';
-let supabaseClient=null,events=[],editingId=null;
-function normalizeEvent(x){return {...x,desc:x.description??x.desc??''}}
+let supabaseClient=null;
+window.supabaseClient=null;
+
+function normalizeEvent(row,fallback={}){
+ return {
+   id:row.id??fallback.id,
+   date:row.date??fallback.date,
+   title:row.title??fallback.title,
+   desc:row.description??row.desc??fallback.desc??'',
+   image_url:row.image_url??fallback.image_url??fallback.image??''
+ };
+}
 async function initSupabase(){
-  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-  const {data,error}=await supabaseClient.from('events').select('*').order('date',{ascending:true}).order('id',{ascending:true});
-  if(error){alert('No se pudieron leer los recuerdos: '+error.message);return}
-  events=(data||[]).map(normalizeEvent);renderEvents();
+ if(!window.supabase?.createClient){
+   console.error('No se pudo cargar supabase-js. Se conservará el modo local.');
+   return;
+ }
+ supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+ window.supabaseClient=supabaseClient;
+ try{
+   const {data,error}=await supabaseClient.from('events').select('*').order('date',{ascending:true}).order('id',{ascending:true});
+   if(error)throw error;
+   if(Array.isArray(data)){
+     events=data.map(x=>normalizeEvent(x));
+   }
+   renderEvents();
+ }catch(err){
+   console.error('Supabase:',err);
+   events=[];
+   renderEvents();
+ }
 }
-function renderEvents(){
-  const el=document.getElementById('timeline');
-  el.innerHTML=events.length?events.map(e=>`<article>
-    ${e.image_url?`<img src="${e.image_url}" alt="">`:''}
-    <small>${e.date}</small><h3>${e.title}</h3><p>${e.desc||''}</p>
-    <div class="actions"><button onclick="openEvent(${e.id})">Editar</button><button onclick="deleteEvent(${e.id})">Eliminar</button></div>
-  </article>`).join(''):'<p>No hay recuerdos todavía.</p>';
-}
-function openEvent(id=null){
-  editingId=id;
-  const e=events.find(x=>x.id===id);
-  eventDate.value=e?.date||'';eventTitle.value=e?.title||'';eventDesc.value=e?.desc||'';eventImage.value='';
-  modalTitle.textContent=e?'Editar recuerdo':'Nuevo recuerdo';modal.classList.add('open');
-}
-function closeEvent(){modal.classList.remove('open');editingId=null}
 async function uploadEventImage(file){
-  if(!file)return null;
-  const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
-  const path=`events/${Date.now()}-${crypto.randomUUID()}.${ext}`;
-  const {error}=await supabaseClient.storage.from('event-images').upload(path,file,{upsert:false});
-  if(error)throw error;
-  const {data}=supabaseClient.storage.from('event-images').getPublicUrl(path);
-  return data.publicUrl;
+ if(!window.supabaseClient)throw new Error('Supabase no configurado');
+ const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+ const path=`${crypto.randomUUID()}.${ext}`;
+ const {error:uploadError}=await window.supabaseClient.storage.from('event-images').upload(path,file,{upsert:true,contentType:file.type});
+ if(uploadError){
+   if(String(uploadError.message||'').toLowerCase().includes('bucket')){
+     throw new Error('Falta crear el bucket público "event-images" en Supabase Storage.');
+   }
+   throw uploadError;
+ }
+ const {data}=window.supabaseClient.storage.from('event-images').getPublicUrl(path);
+ return data.publicUrl;
+}
+
+const KEY_TODOS='fd_todos_v1';
+let events=[];
+let todos=JSON.parse(localStorage.getItem(KEY_TODOS)||'null')||[
+ {id:1,text:'Tomar un café del Oxxo',done:false},{id:2,text:'Hacer un viaje juntos',done:false},
+ {id:3,text:'Ver un amanecer juntos',done:false},{id:4,text:'Ir a un concierto',done:false}
+];
+function persist(){localStorage.setItem(KEY_TODOS,JSON.stringify(todos))}
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id)); if(id==='story')renderEvents();if(id==='todos')renderTodos();if(id==='secrets')renderSecrets()}
+function fmt(d){return new Date(d+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})}
+function renderEvents(){
+ const el=document.getElementById('timeline');
+ const arr=[...events].sort((a,b)=>a.date.localeCompare(b.date));
+ el.innerHTML=arr.map(e=>{
+   const image=e.image_url||e.image||'';
+   const media=image
+     ? `<img class="event-photo" src="${escapeHtml(image)}" alt="${escapeHtml(e.title)}">`
+     : `<div class="event-placeholder">♡</div>`;
+   return `<article class="event card">
+     <div class="event-grid">
+       <div class="story-image-wrap">
+         ${media}
+         <div class="story-image-actions">
+           <button class="story-image-btn" type="button" onclick="changeEventImage(${e.id})">🖼️ ${image?'Cambiar':'Agregar'} imagen</button>
+         </div>
+       </div>
+       <div>
+         <div class="event-date">${fmt(e.date)}</div>
+         <h3>${escapeHtml(e.title)}</h3>
+         <p>${escapeHtml(e.desc||'')}</p>
+         <div class="actions">
+           <button class="btn ghost small" onclick="editEvent(${e.id})">Editar</button>
+           <button class="btn ghost small" onclick="deleteEvent(${e.id})">Eliminar</button>
+         </div>
+       </div>
+     </div>
+   </article>`;
+ }).join('');
+ if(!arr.length) el.innerHTML='<div class="empty card">Todavía no hay recuerdos. Agrega el primero. ❤️</div>';
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function openEvent(){
+ const modal=document.getElementById('eventModal');
+ document.getElementById('modalTitle').textContent='Agregar recuerdo';
+ document.getElementById('eventDate').value='';
+ document.getElementById('eventTitle').value='';
+ document.getElementById('eventDesc').value='';
+ document.getElementById('eventImage').value='';
+ modal.dataset.id='';
+ clearEventImagePreview();
+ modal.classList.add('open');
+}
+function editEvent(id){
+ const e=events.find(x=>x.id===id);
+ if(!e)return;
+ const modal=document.getElementById('eventModal');
+ document.getElementById('modalTitle').textContent='Editar recuerdo';
+ document.getElementById('eventDate').value=e.date||'';
+ document.getElementById('eventTitle').value=e.title||'';
+ document.getElementById('eventDesc').value=e.desc||'';
+ document.getElementById('eventImage').value='';
+ modal.dataset.id=id;
+ setEventImagePreview(e.image_url||e.image||'');
+ modal.classList.add('open');
+}
+function closeEvent(){document.getElementById('eventModal').classList.remove('open')}
+function clearEventImagePreview(){
+ const wrap=document.getElementById('eventImagePreviewWrap');
+ const img=document.getElementById('eventImagePreview');
+ wrap.style.display='none'; img.removeAttribute('src');
+}
+function setEventImagePreview(src){
+ const wrap=document.getElementById('eventImagePreviewWrap');
+ const img=document.getElementById('eventImagePreview');
+ if(src){img.src=src;wrap.style.display='block'}else clearEventImagePreview();
+}
+function previewEventImage(){
+ const f=document.getElementById('eventImage').files[0];
+ if(!f)return;
+ setEventImagePreview(URL.createObjectURL(f));
 }
 async function saveEvent(){
-  const date=eventDate.value,title=eventTitle.value.trim(),description=eventDesc.value.trim();
-  if(!date||!title){alert('Fecha y título son obligatorios.');return}
-  try{
-    let image_url=editingId?events.find(e=>e.id===editingId)?.image_url:null;
-    if(eventImage.files[0])image_url=await uploadEventImage(eventImage.files[0]);
-    if(editingId){
-      const {data,error}=await supabaseClient.from('events').update({date,title,description,image_url}).eq('id',editingId).select().single();
-      if(error)throw error;
-      events=events.map(e=>e.id===editingId?normalizeEvent(data):e);
-    }else{
-      const {data,error}=await supabaseClient.from('events').insert({date,title,description,image_url}).select().single();
-      if(error)throw error;
-      events.push(normalizeEvent(data));events.sort((a,b)=>a.date.localeCompare(b.date)||a.id-b.id);
-    }
-    closeEvent();renderEvents();
-  }catch(err){alert('No se pudo guardar: '+err.message)}
+ const date=document.getElementById('eventDate').value;
+ const title=document.getElementById('eventTitle').value.trim();
+ const desc=document.getElementById('eventDesc').value.trim();
+ const file=document.getElementById('eventImage').files[0];
+ if(!date||!title){alert('Fecha y título son obligatorios.');return}
+ const id=Number(document.getElementById('eventModal').dataset.id);
+
+ if(window.supabaseClient){
+   try{
+     let image_url=null;
+     if(file) image_url=await uploadEventImage(file);
+     if(id){
+       const payload={date,title,description:desc};
+       if(image_url) payload.image_url=image_url;
+       const {data,error}=await window.supabaseClient.from('events').update(payload).eq('id',id).select().single();
+       if(error)throw error;
+       const idx=events.findIndex(x=>x.id===id);
+       if(idx>=0)events[idx]=normalizeEvent(data,events[idx]);
+     }else{
+       const payload={date,title,description:desc};
+       if(image_url)payload.image_url=image_url;
+       const {data,error}=await window.supabaseClient.from('events').insert(payload).select().single();
+       if(error)throw error;
+       events.push(normalizeEvent(data));
+     }
+     closeEvent();renderEvents();return;
+   }catch(err){
+     console.error(err);
+     alert('No se pudo guardar en Supabase. Revisa la configuración y las tablas.');
+     return;
+   }
+ }
+
+ // Local fallback.
+ if(id){
+   const e=events.find(x=>x.id===id);
+   if(e){
+     Object.assign(e,{date,title,desc});
+     if(file)e.image=URL.createObjectURL(file);
+   }
+ }else{
+   events.push({id:Date.now(),date,title,desc,image:file?URL.createObjectURL(file):''});
+ }
+ persist();closeEvent();renderEvents();
 }
+async function changeEventImage(id){
+ const e=events.find(x=>x.id===id);
+ if(!e)return;
+ const input=document.createElement('input');
+ input.type='file';input.accept='image/*';input.className='file-hidden';
+ document.body.appendChild(input);
+ input.addEventListener('change',async()=>{
+   const file=input.files[0];
+   input.remove();
+   if(!file)return;
+   if(window.supabaseClient){
+     try{
+       const image_url=await uploadEventImage(file);
+       const {data,error}=await window.supabaseClient.from('events').update({image_url}).eq('id',id).select().single();
+       if(error)throw error;
+       const idx=events.findIndex(x=>x.id===id);
+       if(idx>=0)events[idx]=normalizeEvent(data,events[idx]);
+         renderEvents();
+     }catch(err){console.error(err);alert('No se pudo cambiar la imagen en Supabase.')}
+   }else{
+     e.image=URL.createObjectURL(file);persist();renderEvents();
+   }
+ });
+ input.click();
+}
+
 async function deleteEvent(id){
-  if(!confirm('¿Eliminar este recuerdo?'))return;
-  const {error}=await supabaseClient.from('events').delete().eq('id',id);
-  if(error){alert('No se pudo eliminar: '+error.message);return}
-  events=events.filter(e=>e.id!==id);renderEvents();
+ if(!confirm('¿Eliminar este recuerdo?'))return;
+ if(window.supabaseClient){
+   try{
+     const {error}=await window.supabaseClient.from('events').delete().eq('id',id);
+     if(error)throw error;
+     events=events.filter(e=>e.id!==id);renderEvents();return;
+   }catch(err){console.error(err);alert('No se pudo eliminar el recuerdo de Supabase.');return}
+ }
+ events=events.filter(e=>e.id!==id);persist();renderEvents();
 }
-initSupabase();
+function renderTodos(){let done=todos.filter(x=>x.done).length,total=todos.length;document.getElementById('progress').style.width=(total?done/total*100:0)+'%';document.getElementById('todoCount').textContent=`${done} de ${total} completadas`;document.getElementById('todosList').innerHTML=todos.map(t=>`<label class="todo card ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTodo(${t.id})"><span>${escapeHtml(t.text)}</span><button class="btn ghost small" type="button" onclick="deleteTodo(${t.id})">×</button></label>`).join('')}
+function addTodo(){let v=document.getElementById('todoInput').value.trim();if(!v)return;todos.push({id:Date.now(),text:v,done:false});document.getElementById('todoInput').value='';persist();renderTodos()}
+function toggleTodo(id){let t=todos.find(x=>x.id===id);t.done=!t.done;persist();renderTodos()}
+function deleteTodo(id){todos=todos.filter(x=>x.id!==id);persist();renderTodos()}
+const SECRET_ITEMS=[
+ {title:'Nuestra primera cita',text:'Un momento que marcó el inicio de todo lo que vino después.'},
+ {title:'El primer regalo',text:'Un pequeño detalle que se quedó como parte de nuestra historia.'},
+ {title:'El primer beso',text:'16 de septiembre de 2025. ❤️'},
+ {title:'El famoso no del 18 de septiembre',text:'La historia no terminó ahí; todavía quedaban unos días para el sí.'},
+ {title:'El sí del 26 de septiembre',text:'Seis días después llegó el sí. Y desde ahí, oficialmente, nosotros.'},
+ {title:'El chocolate',text:'Un detalle pequeño puede terminar convertido en un recuerdo enorme.'},
+ {title:'La sorpresa de cumpleaños',text:'Un cumpleaños que terminó significando mucho más de lo esperado.'},
+ {title:'Nuestra foto',text:'Un instante que merece quedarse guardado para volver a verlo.'},
+ {title:'El café del Oxxo',text:'A veces la historia perfecta no necesita una cafetería cara. 😂'},
+ {title:'Nuestra canción',text:'Este espacio queda reservado para la canción que quieras que acompañe nuestra historia.'}
+];
+function renderSecrets(){
+ const el=document.getElementById('secretGrid');
+ el.innerHTML=SECRET_ITEMS.map((x,i)=>`<article class="secret card" id="secret-${i}">
+   <div class="eyebrow">Recuerdo ${String(i+1).padStart(2,'0')}</div>
+   <h3>${escapeHtml(x.title)}</h3>
+   <div class="secret-body" id="secret-body-${i}" style="display:none">${escapeHtml(x.text)}</div>
+   <button class="btn ghost small reveal-btn" onclick="revealSecret(${i})">Descubrir</button>
+ </article>`).join('');
+}
+function revealSecret(i){
+ const body=document.getElementById('secret-body-'+i);
+ const card=document.getElementById('secret-'+i);
+ const btn=card.querySelector('button');
+ const open=body.style.display!=='none';
+ body.style.display=open?'none':'block';
+ card.classList.toggle('revealed',!open);
+ btn.textContent=open?'Descubrir':'Ocultar';
+}
+function initMedia(){
+ const pi=document.getElementById('photoInput'), vi=document.getElementById('videoInput'), ai=document.getElementById('audioInput');
+ if(pi)pi.addEventListener('change',e=>{
+   const files=[...e.target.files], album=document.getElementById('photoAlbum');
+   album.innerHTML='';
+   files.forEach(f=>{const url=URL.createObjectURL(f);const d=document.createElement('div');d.className='photo';const img=document.createElement('img');img.src=url;img.alt=f.name;d.appendChild(img);album.appendChild(d)});
+   document.getElementById('photoStatus').textContent=files.length?`${files.length} fotografía(s) seleccionada(s).`:'Aún no has seleccionado fotografías.';
+ });
+ if(vi)vi.addEventListener('change',e=>{
+   const f=e.target.files[0], p=document.getElementById('videoPlayer');
+   if(!f){p.style.display='none';return}
+   p.src=URL.createObjectURL(f);p.style.display='block';document.getElementById('videoStatus').textContent=f.name;
+ });
+ if(ai)ai.addEventListener('change',e=>{
+   const f=e.target.files[0], p=document.getElementById('audioPlayer');
+   if(!f){p.style.display='none';return}
+   p.src=URL.createObjectURL(f);p.style.display='block';document.getElementById('audioStatus').textContent=f.name;
+ });
+}
+function saveLetter(){
+ const value=document.getElementById('letterText').value;
+ localStorage.setItem('fd_letter_v1',value);
+ document.getElementById('letterStatus').textContent='Carta guardada en este dispositivo.';
+}
+function clearLetter(){
+ if(!confirm('¿Borrar la carta guardada?'))return;
+ document.getElementById('letterText').value='';
+ localStorage.removeItem('fd_letter_v1');
+ document.getElementById('letterStatus').textContent='Carta borrada.';
+}
+function loadLetter(){
+ const v=localStorage.getItem('fd_letter_v1')||'';
+ document.getElementById('letterText').value=v;
+}
+
+function toggleMusic(){document.getElementById('musicPanel').classList.toggle('open')}
+document.getElementById('eventImage')?.addEventListener('change',previewEventImage);
+renderTodos();renderSecrets();initMedia();loadLetter();initSupabase();
 </script>
+</div>
 </body>
 </html>
