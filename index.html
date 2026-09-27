@@ -340,6 +340,13 @@ body.is-admin .album-admin-menu.open,body.is-editor .album-admin-menu.open{displ
 .album-admin-menu button:last-child{border-bottom:0}
 @media(max-width:650px){.story-quickbar{grid-template-columns:1fr 1fr}.album-admin-menu{right:8px;left:8px;top:50px;width:auto;max-height:calc(100% - 58px);overflow:auto}.album-admin-menu button{font-size:10px;padding:8px}.album-cover-item .album-admin-menu{left:auto;width:170px}}
 
+
+/* Album menus must override the generic core-editor-only visibility rule */
+body.is-admin #album .album-admin-menu.core-editor-only,
+body.is-editor #album .album-admin-menu.core-editor-only{display:none!important}
+body.is-admin #album .album-admin-menu.core-editor-only.open,
+body.is-editor #album .album-admin-menu.core-editor-only.open{display:grid!important;grid-template-columns:1fr!important}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
