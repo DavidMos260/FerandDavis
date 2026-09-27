@@ -384,12 +384,13 @@ body.is-editor .admin-full-only{display:none!important}
   <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('home')">← Inicio</button></div>
   <div class="section-head">
    <div><h2>Nuestra historia</h2><p class="subtitle">Desde el 26 de septiembre de 2025.</p></div>
+   <button class="btn lilac admin-only" onclick="openEvent()">＋ Agregar recuerdo</button>
   </div>
+  <div id="timeline" class="timeline"></div>
   <div class="actions">
    <button class="btn ghost" onclick="go('album')">📸 Nuestros momentos</button>
    <button class="btn ghost" onclick="go('todos')">☑ Nuestra lista</button>
    <button class="btn ghost" onclick="go('reasons')">♥ 100 razones</button>
-   <button class="btn ghost" onclick="go('secrets')">🔐 10 cosas que quiero que recuerdes</button>
    <button class="btn lilac" onclick="go('letter')">✉ Carta</button>
   </div>
  </div>
@@ -428,16 +429,6 @@ body.is-editor .admin-full-only{display:none!important}
 
   <div class="reasons-grid" id="reasonsGrid"><div class="card reason-card">Cargando razones…</div></div>
   <div class="actions"><button class="btn ghost" onclick="go('home')">← Volver a nuestra historia</button><button class="btn lilac" onclick="go('secrets')">10 cosas que quiero que recuerdes →</button></div>
- </div>
-</section>
-
-<section class="screen" id="secrets">
- <div class="screen-inner">
-  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('home')">← Inicio</button></div>
-  <h2>10 cosas que quiero que recuerdes</h2>
-  <p class="subtitle">Toca cada recuerdo para descubrirlo.</p>
-  <div class="secret-grid" id="secretGrid"></div>
-  <div class="actions"><button class="btn lilac" onclick="go('letter')">💌 Ir a la carta</button></div>
  </div>
 </section>
 
@@ -879,7 +870,7 @@ let todos=[];
 let coupleReasons=[];
 let editingReasonPosition=null;
 function persist(){}
-function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));if(id==='album')loadAlbum();if(id==='todos')loadTodos();if(id==='letter')loadLetter();if(id==='secrets')renderSecrets();if(id==='reasons')loadReasons();requestAnimationFrame(()=>prepareReveals(document.getElementById(id)||document))}
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));if(id==='story')renderEvents();if(id==='album')loadAlbum();if(id==='todos')loadTodos();if(id==='letter')loadLetter();if(id==='reasons')loadReasons();requestAnimationFrame(()=>prepareReveals(document.getElementById(id)||document))}
 async function loadTodos(){
  if(!supabaseClient)return;
  const {data,error}=await supabaseClient.from('couple_todos').select('*').order('sort_order',{ascending:true}).order('id',{ascending:true});
