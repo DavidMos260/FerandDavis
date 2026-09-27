@@ -263,6 +263,21 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
 .ui-dialog-danger .ui-dialog-icon{background:#f8eeee;color:#9d5050}
 .ui-dialog-danger .btn.primary-action{background:#9d5050;color:#fff;border-color:#9d5050}
 @media(prefers-reduced-motion:reduce){.reveal-in,.screen.active .screen-inner,.hero-heart{opacity:1!important;transform:none!important;animation:none!important;transition:none!important}}
+
+/* Final motion, feedback and polish */
+.screen.active .screen-inner{animation:screenEnter .46s cubic-bezier(.2,.75,.25,1) both}
+@keyframes screenEnter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.hero-heart{animation:heartBeat 2.8s ease-in-out infinite;transform-origin:center}
+@keyframes heartBeat{0%,100%{transform:scale(1)}8%{transform:scale(1.12)}16%{transform:scale(1)}24%{transform:scale(1.08)}34%{transform:scale(1)}}
+.reveal-ready{opacity:0;transform:translateY(18px);transition:opacity .52s ease,transform .52s ease}
+.reveal-ready.reveal-visible{opacity:1;transform:none}
+.app-toast{position:fixed;z-index:800;left:50%;bottom:28px;transform:translate(-50%,18px);max-width:min(420px,calc(100vw - 28px));padding:12px 16px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.97);box-shadow:0 14px 42px rgba(43,30,55,.2);font:600 13px Arial,sans-serif;color:var(--ink);opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
+.app-toast.show{opacity:1;transform:translate(-50%,0)}
+.confirm-modal .modal-card{width:min(460px,100%);text-align:center}
+.confirm-icon{width:52px;height:52px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;background:rgba(118,85,159,.1);font-size:23px;color:var(--lilac-dark)}
+.confirm-modal p{color:var(--muted);line-height:1.55}
+.text-modal .modal-card{width:min(460px,100%)}
+@media(prefers-reduced-motion:reduce){.screen.active .screen-inner,.hero-heart{animation:none!important}.reveal-ready{opacity:1!important;transform:none!important}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
 </head>
@@ -321,6 +336,21 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
   </div>
  </div>
 </div>
+<div class="modal confirm-modal" id="confirmModal" aria-hidden="true">
+ <div class="modal-card card">
+  <div class="confirm-icon">♡</div><div class="eyebrow">Confirmar acción</div>
+  <h3 id="confirmTitle">¿Estás seguro?</h3><p id="confirmMessage"></p>
+  <div class="modal-actions"><button class="btn ghost" type="button" id="confirmCancel">Cancelar</button><button class="btn lilac" type="button" id="confirmAccept">Confirmar</button></div>
+ </div>
+</div>
+<div class="modal text-modal" id="textInputModal" aria-hidden="true">
+ <div class="modal-card card"><div class="eyebrow">Álbum</div><h3 id="textInputTitle">Nombre del momento</h3>
+  <div class="form"><div><label>Título</label><input id="textInputValue" maxlength="120" placeholder="Nuestro momento"></div>
+   <div class="modal-actions"><button class="btn ghost" type="button" id="textInputCancel">Cancelar</button><button class="btn lilac" type="button" id="textInputAccept">Continuar</button></div>
+  </div>
+ </div>
+</div>
+<div class="app-toast" id="appToast" role="status" aria-live="polite"></div>
 <div class="app">
 <section class="screen hero active" id="home">
  <div class="screen-inner">
@@ -500,6 +530,41 @@ function prepareReveals(root=document){
    “Nuestra historia” lee, crea, edita y elimina recuerdos directamente en public.events.
    Los recuerdos no usan localStorage.
 */
+
+let toastTimer=null;
+function showToast(message){
+ const el=document.getElementById('appToast');if(!el)return;
+ el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);
+ toastTimer=setTimeout(()=>el.classList.remove('show'),3200);
+}
+function askConfirm(message,title='¿Estás seguro?'){
+ return new Promise(resolve=>{
+  const modal=document.getElementById('confirmModal'),accept=document.getElementById('confirmAccept'),cancel=document.getElementById('confirmCancel');
+  document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmMessage').textContent=message;
+  modal.classList.add('open');modal.setAttribute('aria-hidden','false');
+  const done=value=>{modal.classList.remove('open');modal.setAttribute('aria-hidden','true');accept.onclick=null;cancel.onclick=null;resolve(value)};
+  accept.onclick=()=>done(true);cancel.onclick=()=>done(false);
+  modal.onclick=e=>{if(e.target===modal)done(false)};
+ });
+}
+function askText(title,initial='Nuestro momento'){
+ return new Promise(resolve=>{
+  const modal=document.getElementById('textInputModal'),input=document.getElementById('textInputValue'),accept=document.getElementById('textInputAccept'),cancel=document.getElementById('textInputCancel');
+  document.getElementById('textInputTitle').textContent=title;input.value=initial;modal.classList.add('open');modal.setAttribute('aria-hidden','false');
+  setTimeout(()=>{input.focus();input.select()},30);
+  const done=value=>{modal.classList.remove('open');modal.setAttribute('aria-hidden','true');accept.onclick=null;cancel.onclick=null;input.onkeydown=null;resolve(value)};
+  accept.onclick=()=>done(input.value);cancel.onclick=()=>done(null);input.onkeydown=e=>{if(e.key==='Enter')done(input.value);if(e.key==='Escape')done(null)};
+  modal.onclick=e=>{if(e.target===modal)done(null)};
+ });
+}
+let revealObserver=null;
+function refreshRevealAnimations(root=document){
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ if(!revealObserver)revealObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('reveal-visible');revealObserver.unobserve(entry.target)}}),{threshold:.08});
+ root.querySelectorAll('.screen.active .card,.screen.active .event,.screen.active .album-item,.screen.active .secret').forEach((el,i)=>{
+  if(el.dataset.revealBound)return;el.dataset.revealBound='1';el.classList.add('reveal-ready');el.style.transitionDelay=Math.min(i,5)*45+'ms';revealObserver.observe(el);
+ });
+}
 const SUPABASE_URL='https://ehyctjjdaqgxphlewdwq.supabase.co';
 const SUPABASE_ANON_KEY='sb_publishable_tJ-EEvB5KirznaGNFujxuQ__RkuI1ad';
 let supabaseClient=null;
@@ -647,7 +712,7 @@ async function addAlbumMedia(){
    showNotice('Este video pesa '+mb+' MB. El límite actual de Supabase es 50 MB.\n\nComprímelo o recórtalo hasta que pese menos de 50 MB y vuelve a intentarlo.');
    return;
   }
-  const title=prompt(media_type==='video'?'Título del video:':'Título de la fotografía:','Nuestro momento');if(title===null)return;
+  const title=await askText(media_type==='video'?'Título del video':'Título de la fotografía','Nuestro momento');if(title===null)return;
   try{
    showUploadProgress(file);
    const image_url=await uploadEventImage(file);
@@ -790,6 +855,7 @@ function renderEvents(){
      </div>
    </article>`;
  }).join('');
+ requestAnimationFrame(()=>refreshRevealAnimations(el));
  if(!arr.length) el.innerHTML='<div class="empty card">Todavía no hay recuerdos. Agrega el primero. ❤️</div>';
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
