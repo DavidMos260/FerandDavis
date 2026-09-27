@@ -711,7 +711,7 @@ function renderAlbum(){
   const type=p.media_type==='video'?'video':'image';
   const media=type==='video'
    ? `<video id="albumVideo${p.id}" src="${escapeHtml(p.image_url)}" controls playsinline preload="metadata"></video><button class="album-fullscreen" type="button" onclick="openAlbumMedia(${p.id})" aria-label="Ver video en pantalla completa">⛶</button>`
-   : `<img class="album-image" src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.title||'Fotografía')}" onclick="openPhotoLightbox(${p.id})">`;
+   : `<img class="album-image" src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.title||'Fotografía')}" onclick="openAlbumMedia(${p.id})">`;
   const order=`<div class="album-order core-editor-only"><button type="button" onclick="moveAlbumItem(${p.id},-1)" aria-label="Mover antes" ${index===0?'disabled':''}>←</button><button type="button" onclick="moveAlbumItem(${p.id},1)" aria-label="Mover después" ${index===albumPhotos.length-1?'disabled':''}>→</button></div>`;
   return `<article class="album-item">${media}<div class="album-caption">${escapeHtml(p.title||'Nuestro momento')}</div>${order}<button class="album-edit core-editor-only" type="button" onclick="editAlbumTitle(${p.id})">Editar</button><button class="album-delete core-editor-only" type="button" onclick="deleteAlbumPhoto(${p.id})">Eliminar</button></article>`;
  }).join('');
@@ -722,7 +722,7 @@ let activeMediaContext=null,activeMediaId=null;
 function albumMediaItems(){return albumPhotos}
 function eventMediaItems(){return [...events].filter(e=>e.image_url||e.image).sort((a,b)=>a.date.localeCompare(b.date))}
 function closeMediaViewer(){
- closePhotoLightbox();
+ activeMediaContext=null;activeMediaId=null;closePhotoLightbox();
  const box=document.getElementById('videoLightbox'),player=document.getElementById('fullscreenVideo');
  if(player){player.pause();player.removeAttribute('src');player.load()}
  if(box){box.classList.remove('open');box.setAttribute('aria-hidden','true')}
@@ -935,7 +935,7 @@ function renderEvents(){
    const media=image
      ? (e.media_type==='video'
        ? `<div class="album-video-wrap"><video class="event-photo" id="event-video-${e.id}" src="${escapeHtml(image)}" preload="metadata" playsinline></video><button class="album-video-open" type="button" onclick="openEventMedia(${e.id})">▶ Ver video</button></div>`
-       : `<img class="event-photo" src="${escapeHtml(image)}" alt="${escapeHtml(e.title)}" role="button" tabindex="0" onclick="openEventPhotoDirect(this.src,this.alt,'${e.id}','${escapeHtml(e.date)}')" onkeydown="if(event.key==='Enter'||event.key===' ')openEventPhotoDirect(this.src,this.alt,'${e.id}','${escapeHtml(e.date)}')">`)
+       : `<img class="event-photo" src="${escapeHtml(image)}" alt="${escapeHtml(e.title)}" role="button" tabindex="0" onclick="openEventMedia('${e.id}')" onkeydown="if(event.key==='Enter'||event.key===' ')openEventMedia('${e.id}')">`)
      : `<div class="event-placeholder">♡</div>`;
    return `<article class="event card">
      <div class="event-grid">
