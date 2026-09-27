@@ -347,6 +347,12 @@ body.is-editor #album .album-admin-menu.core-editor-only{display:none!important}
 body.is-admin #album .album-admin-menu.core-editor-only.open,
 body.is-editor #album .album-admin-menu.core-editor-only.open{display:grid!important;grid-template-columns:1fr!important}
 
+
+#album .album-admin-menu{display:none!important}
+body.is-admin #album .album-admin-menu.open,
+body.is-editor #album .album-admin-menu.open{display:flex!important;flex-direction:column!important;align-items:stretch!important}
+#album .album-admin-menu button{display:block!important;width:100%!important;flex:0 0 auto!important}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -781,7 +787,7 @@ function renderAlbum(){
   const media=type==='video'
    ? `<video id="albumVideo${p.id}" src="${escapeHtml(p.image_url)}" muted playsinline preload="metadata" onclick="openAlbumMedia(${p.id})"></video><div class="album-video-mark">▶</div>`
    : `<img class="album-image" src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.title||'Fotografía')}" onclick="openAlbumMedia(${p.id})">`;
-  const admin=`<div class="album-admin-menu core-editor-only" id="albumMenu${p.id}"><button type="button" onclick="editAlbumTitle(${p.id});closeAlbumMenus()">Editar título</button><button type="button" onclick="setAlbumCover(${p.id});closeAlbumMenus()">${p.is_cover?'Portada actual':'Hacer portada'}</button><button type="button" onclick="moveAlbumItem(${p.id},-1);closeAlbumMenus()" ${originalIndex===0?'disabled':''}>Mover antes</button><button type="button" onclick="moveAlbumItem(${p.id},1);closeAlbumMenus()" ${originalIndex===albumPhotos.length-1?'disabled':''}>Mover después</button><button class="danger" type="button" onclick="deleteAlbumPhoto(${p.id});closeAlbumMenus()">Eliminar</button></div>`;
+  const admin=`<div class="album-admin-menu" id="albumMenu${p.id}"><button type="button" onclick="editAlbumTitle(${p.id});closeAlbumMenus()">Editar título</button><button type="button" onclick="setAlbumCover(${p.id});closeAlbumMenus()">${p.is_cover?'Portada actual':'Hacer portada'}</button><button type="button" onclick="moveAlbumItem(${p.id},-1);closeAlbumMenus()" ${originalIndex===0?'disabled':''}>Mover antes</button><button type="button" onclick="moveAlbumItem(${p.id},1);closeAlbumMenus()" ${originalIndex===albumPhotos.length-1?'disabled':''}>Mover después</button><button class="danger" type="button" onclick="deleteAlbumPhoto(${p.id});closeAlbumMenus()">Eliminar</button></div>`;
   return `<article class="album-item ${p.is_cover?'album-cover-item':''}">${p.is_cover?'<div class="album-cover-badge">★ Portada</div>':''}${media}<div class="album-caption">${escapeHtml(p.title||'Nuestro momento')}</div><button class="album-more core-editor-only" type="button" onclick="event.stopPropagation();toggleAlbumMenu(${p.id})" aria-label="Opciones">⋯</button>${admin}</article>`;
  }).join('');
 }
