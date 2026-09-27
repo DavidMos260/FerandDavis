@@ -305,6 +305,13 @@ body.is-editor .admin-full-only{display:none!important}
 .story-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:28px}
 .story-menu .btn{width:100%;min-height:54px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:none}
 @media(max-width:420px){.story-menu{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.story-menu .btn{padding:12px 9px;font-size:15px}}
+
+/* Home cover fills the complete visible screen, including the area behind floating controls */
+#home.hero{min-height:100dvh}
+#home.hero .hero-cover{position:fixed;inset:0}
+#home.hero .screen-inner{height:100dvh;min-height:100dvh;padding-top:max(18px,env(safe-area-inset-top));padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+@supports not (height:100dvh){#home.hero,#home.hero .screen-inner{min-height:100vh;height:100vh}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
