@@ -723,13 +723,18 @@ function openPhotoLightbox(id){
  document.getElementById('photoLightboxTitle').textContent=p.title||'Nuestro momento';
  const box=document.getElementById('photoLightbox');box.classList.add('open');box.setAttribute('aria-hidden','false');
 }
+let activeEventPhotoId=null;
+function eventPhotoItems(){return [...events].filter(e=>(e.image_url||e.image)&&e.media_type!=='video').sort((a,b)=>a.date.localeCompare(b.date))}
 function openEventPhoto(id){
- const e=events.find(x=>x.id===id&&x.media_type!=='video');if(!e)return;
+ const e=eventPhotoItems().find(x=>String(x.id)===String(id));if(!e)return;
  const img=document.getElementById('photoLightboxImage'),title=document.getElementById('photoLightboxTitle'),box=document.getElementById('photoLightbox');
- img.src=e.image_url||e.image||'';img.alt=e.title||'Recuerdo';title.textContent=e.title||'Recuerdo';activePhotoId=null;setPhotoLightboxNavigation(false);box.classList.add('open');box.setAttribute('aria-hidden','false');
+ img.src=e.image_url||e.image||'';img.alt=e.title||'Recuerdo';title.textContent=(e.date?formatDate(e.date)+' · ':'')+(e.title||'Recuerdo');activePhotoId=null;activeEventPhotoId=e.id;setPhotoLightboxNavigation(eventPhotoItems().length>1);box.classList.add('open');box.setAttribute('aria-hidden','false');
 }
-function closePhotoLightbox(){const box=document.getElementById('photoLightbox');box.classList.remove('open');box.setAttribute('aria-hidden','true');document.getElementById('photoLightboxImage').removeAttribute('src');activePhotoId=null}
-function stepPhoto(delta){const arr=photoItems();if(!arr.length)return;let i=arr.findIndex(x=>x.id===activePhotoId);i=(i+delta+arr.length)%arr.length;openPhotoLightbox(arr[i].id)}
+function closePhotoLightbox(){const box=document.getElementById('photoLightbox');box.classList.remove('open');box.setAttribute('aria-hidden','true');document.getElementById('photoLightboxImage').removeAttribute('src');activePhotoId=null;activeEventPhotoId=null}
+function stepPhoto(delta){
+ if(activeEventPhotoId!==null){const arr=eventPhotoItems();if(!arr.length)return;let i=arr.findIndex(x=>String(x.id)===String(activeEventPhotoId));i=(i+delta+arr.length)%arr.length;openEventPhoto(arr[i].id);return}
+ const arr=photoItems();if(!arr.length)return;let i=arr.findIndex(x=>x.id===activePhotoId);i=(i+delta+arr.length)%arr.length;openPhotoLightbox(arr[i].id)
+}
 async function openVideoFullscreen(id){
  const source=document.getElementById(id),box=document.getElementById('videoLightbox'),player=document.getElementById('fullscreenVideo');
  if(!source||!box||!player)return;
