@@ -312,6 +312,23 @@ body.is-editor .admin-full-only{display:none!important}
 #home.hero .screen-inner{height:100dvh;min-height:100dvh;padding-top:max(18px,env(safe-area-inset-top));padding-bottom:calc(88px + env(safe-area-inset-bottom))}
 @supports not (height:100dvh){#home.hero,#home.hero .screen-inner{min-height:100vh;height:100vh}}
 
+
+.story-quickbar{position:sticky;top:0;z-index:18;display:grid;grid-template-columns:1fr auto 1fr;gap:7px;margin:0 0 10px;padding:7px;background:rgba(250,248,252,.9);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:18px}
+.story-quickbar button,.story-quicknav button{border:0;background:#fff;color:var(--ink);border-radius:999px;padding:10px 12px;font:600 12px Arial,sans-serif}
+.story-quicknav{display:none;grid-template-columns:repeat(5,1fr);gap:7px;margin:-2px 0 12px;padding:8px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.94);position:sticky;top:58px;z-index:17;box-shadow:var(--shadow)}
+.story-quicknav.open{display:grid}
+.album{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:stretch}
+.album-item{aspect-ratio:1;min-width:0}
+.album-cover-item{grid-column:span 2;grid-row:span 2}
+.album-more{position:absolute;right:9px;top:9px;z-index:8;width:38px;height:38px;border:0;border-radius:50%;background:rgba(255,255,255,.94);color:var(--ink);font:700 22px/1 Arial,sans-serif;box-shadow:0 5px 18px rgba(0,0,0,.14)}
+.album-admin-menu{display:none;position:absolute;right:9px;top:53px;z-index:9;width:150px;padding:6px;background:rgba(255,255,255,.98);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 32px rgba(32,22,40,.22)}
+body.is-admin .album-admin-menu.open,body.is-editor .album-admin-menu.open{display:grid!important}
+.album-admin-menu button{border:0;background:transparent;text-align:left;padding:9px 10px;border-radius:9px;font:600 11px Arial,sans-serif;color:var(--ink)}
+.album-admin-menu button:active{background:var(--lilac-soft)}.album-admin-menu .danger{color:#9d5050}.album-admin-menu button:disabled{opacity:.35}
+.album-video-mark{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:30px;pointer-events:none;text-shadow:0 2px 12px #000}
+.album-cover-badge{pointer-events:none}
+@media(max-width:650px){.story-quickbar{top:-1px}.story-quickbar button{padding:9px 7px;font-size:10px}.story-quicknav{grid-template-columns:repeat(3,1fr);top:52px}.album{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.album-cover-item{grid-column:1/-1;grid-row:auto;aspect-ratio:16/10}.album-caption{padding:30px 10px 9px}.album-more{width:36px;height:36px}.album-admin-menu{width:145px}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -418,7 +435,7 @@ body.is-editor .admin-full-only{display:none!important}
    <div><h2>Nuestra historia</h2><p class="subtitle">Desde el 26 de septiembre de 2025.</p></div>
    <button class="btn lilac core-editor-only" onclick="openEvent()">＋ Agregar recuerdo</button>
   </div>
-  <div class="story-tools"><input id="storySearch" type="search" placeholder="Buscar recuerdos…" oninput="renderEvents()"><select id="storyYear" onchange="renderEvents()"><option value="">Todos los años</option></select><select id="storyMonth" onchange="renderEvents()"><option value="">Todos los meses</option><option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option><option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option><option value="07">Julio</option><option value="08">Agosto</option><option value="09">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select></div>
+  <div class="story-quickbar"><button type="button" onclick="jumpTimeline('oldest')">⇤ Más antiguo</button><button type="button" onclick="toggleStoryNav()">☰ Secciones</button><button type="button" onclick="jumpTimeline('latest')">Más reciente ⇥</button></div><div class="story-quicknav" id="storyQuickNav"><button onclick="go('home')">⌂ Inicio</button><button onclick="go('album')">📸 Álbum</button><button onclick="go('todos')">☑ Lista</button><button onclick="go('reasons')">♥ 100 razones</button><button onclick="go('letter')">✉ Carta</button></div><div class="story-tools"><input id="storySearch" type="search" placeholder="Buscar recuerdos…" oninput="renderEvents()"><select id="storyYear" onchange="renderEvents()"><option value="">Todos los años</option></select><select id="storyMonth" onchange="renderEvents()"><option value="">Todos los meses</option><option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option><option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option><option value="07">Julio</option><option value="08">Agosto</option><option value="09">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select></div>
 <div id="timeline" class="timeline"></div>
   <div class="story-menu">
    <button class="btn ghost" onclick="go('album')">📸 Ver álbum</button>
@@ -740,15 +757,17 @@ function renderHomeCover(){
 function renderAlbum(){
  const el=document.getElementById('cloudAlbum'); if(!el)return;
  if(!albumPhotos.length){el.innerHTML='<div class="album-empty card">Todavía no hay fotos ni videos en el álbum. ❤️</div>';return}
- el.innerHTML=albumPhotos.map((p,index)=>{
-  const type=p.media_type==='video'?'video':'image';
+ const ordered=[...albumPhotos].sort((a,b)=>(b.is_cover?1:0)-(a.is_cover?1:0)||((a.sort_order??0)-(b.sort_order??0)));
+ el.innerHTML=ordered.map((p,index)=>{
+  const type=p.media_type==='video'?'video':'image',originalIndex=albumPhotos.findIndex(x=>String(x.id)===String(p.id));
   const media=type==='video'
-   ? `<video id="albumVideo${p.id}" src="${escapeHtml(p.image_url)}" controls playsinline preload="metadata"></video><button class="album-fullscreen" type="button" onclick="openAlbumMedia(${p.id})" aria-label="Ver video en pantalla completa">⛶</button>`
+   ? `<video id="albumVideo${p.id}" src="${escapeHtml(p.image_url)}" muted playsinline preload="metadata" onclick="openAlbumMedia(${p.id})"></video><div class="album-video-mark">▶</div>`
    : `<img class="album-image" src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.title||'Fotografía')}" onclick="openAlbumMedia(${p.id})">`;
-  const order=`<div class="album-order core-editor-only"><button type="button" onclick="moveAlbumItem(${p.id},-1)" aria-label="Mover antes" ${index===0?'disabled':''}>←</button><button type="button" onclick="moveAlbumItem(${p.id},1)" aria-label="Mover después" ${index===albumPhotos.length-1?'disabled':''}>→</button></div>`;
-  return `<article class="album-item">${p.is_cover?'<div class="album-cover-badge">★ Portada</div>':''}${media}<div class="album-caption">${escapeHtml(p.title||'Nuestro momento')}</div>${order}<button class="album-cover-btn core-editor-only" type="button" onclick="setAlbumCover(${p.id})">${p.is_cover?'Portada actual':'Hacer portada'}</button><button class="album-edit core-editor-only" type="button" onclick="editAlbumTitle(${p.id})">Editar</button><button class="album-delete core-editor-only" type="button" onclick="deleteAlbumPhoto(${p.id})">Eliminar</button></article>`;
+  const admin=`<div class="album-admin-menu core-editor-only" id="albumMenu${p.id}"><button type="button" onclick="editAlbumTitle(${p.id});closeAlbumMenus()">Editar título</button><button type="button" onclick="setAlbumCover(${p.id});closeAlbumMenus()">${p.is_cover?'Portada actual':'Hacer portada'}</button><button type="button" onclick="moveAlbumItem(${p.id},-1);closeAlbumMenus()" ${originalIndex===0?'disabled':''}>Mover antes</button><button type="button" onclick="moveAlbumItem(${p.id},1);closeAlbumMenus()" ${originalIndex===albumPhotos.length-1?'disabled':''}>Mover después</button><button class="danger" type="button" onclick="deleteAlbumPhoto(${p.id});closeAlbumMenus()">Eliminar</button></div>`;
+  return `<article class="album-item ${p.is_cover?'album-cover-item':''}">${p.is_cover?'<div class="album-cover-badge">★ Portada</div>':''}${media}<div class="album-caption">${escapeHtml(p.title||'Nuestro momento')}</div><button class="album-more core-editor-only" type="button" onclick="event.stopPropagation();toggleAlbumMenu(${p.id})" aria-label="Opciones">⋯</button>${admin}</article>`;
  }).join('');
 }
+
 let activePhotoId=null;
 function photoItems(){return albumPhotos.filter(p=>p.media_type!=='video')}
 let activeMediaContext=null,activeMediaId=null;
@@ -1028,6 +1047,15 @@ async function setAlbumCover(id){
  if(current&&String(current.id)!==String(id)){const {error}=await supabaseClient.from('album_photos').update({is_cover:false}).eq('id',current.id);if(error){showNotice(error.message);return}}
  const {error}=await supabaseClient.from('album_photos').update({is_cover:true}).eq('id',id);if(error){showNotice(error.message);return}
  albumPhotos.forEach(x=>x.is_cover=String(x.id)===String(id));renderAlbum();renderHomeCover();
+}
+function toggleStoryNav(){document.getElementById('storyQuickNav')?.classList.toggle('open')}
+function jumpTimeline(where){
+ const cards=document.querySelectorAll('#timeline .event');if(!cards.length)return;
+ (where==='latest'?cards[cards.length-1]:cards[0]).scrollIntoView({behavior:'smooth',block:'center'});
+}
+function closeAlbumMenus(){document.querySelectorAll('.album-admin-menu.open').forEach(x=>x.classList.remove('open'))}
+function toggleAlbumMenu(id){
+ const menu=document.getElementById('albumMenu'+id),was=menu?.classList.contains('open');closeAlbumMenus();if(menu&&!was)menu.classList.add('open');
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function openEvent(){
