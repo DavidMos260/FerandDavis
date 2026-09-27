@@ -329,6 +329,17 @@ body.is-admin .album-admin-menu.open,body.is-editor .album-admin-menu.open{displ
 .album-cover-badge{pointer-events:none}
 @media(max-width:650px){.story-quickbar{top:-1px}.story-quickbar button{padding:9px 7px;font-size:10px}.story-quicknav{grid-template-columns:repeat(3,1fr);top:52px}.album{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.album-cover-item{grid-column:1/-1;grid-row:auto;aspect-ratio:16/10}.album-caption{padding:30px 10px 9px}.album-more{width:36px;height:36px}.album-admin-menu{width:145px}}
 
+
+.story-quickbar{grid-template-columns:1fr 1fr}
+.story-bottom-jump{display:flex;justify-content:center;margin:24px 0 10px}
+.story-bottom-jump button{border:1px solid var(--line);background:#fff;color:var(--lilac-dark);border-radius:999px;padding:11px 18px;font:600 12px Arial,sans-serif;box-shadow:0 7px 22px rgba(44,31,54,.08)}
+.album-item{overflow:hidden}
+.album-admin-menu{display:none!important;right:8px;top:52px;width:min(170px,calc(100% - 16px));padding:6px;grid-template-columns:1fr!important;gap:0;overflow:hidden}
+body.is-admin .album-admin-menu.open,body.is-editor .album-admin-menu.open{display:grid!important}
+.album-admin-menu button{display:block;width:100%;white-space:normal;text-align:left;padding:10px 11px;border-bottom:1px solid rgba(118,85,159,.1)}
+.album-admin-menu button:last-child{border-bottom:0}
+@media(max-width:650px){.story-quickbar{grid-template-columns:1fr 1fr}.album-admin-menu{right:8px;left:8px;top:50px;width:auto;max-height:calc(100% - 58px);overflow:auto}.album-admin-menu button{font-size:10px;padding:8px}.album-cover-item .album-admin-menu{left:auto;width:170px}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -435,9 +446,9 @@ body.is-admin .album-admin-menu.open,body.is-editor .album-admin-menu.open{displ
    <div><h2>Nuestra historia</h2><p class="subtitle">Desde el 26 de septiembre de 2025.</p></div>
    <button class="btn lilac core-editor-only" onclick="openEvent()">＋ Agregar recuerdo</button>
   </div>
-  <div class="story-quickbar"><button type="button" onclick="jumpTimeline('oldest')">⇤ Más antiguo</button><button type="button" onclick="toggleStoryNav()">☰ Secciones</button><button type="button" onclick="jumpTimeline('latest')">Más reciente ⇥</button></div><div class="story-quicknav" id="storyQuickNav"><button onclick="go('home')">⌂ Inicio</button><button onclick="go('album')">📸 Álbum</button><button onclick="go('todos')">☑ Lista</button><button onclick="go('reasons')">♥ 100 razones</button><button onclick="go('letter')">✉ Carta</button></div><div class="story-tools"><input id="storySearch" type="search" placeholder="Buscar recuerdos…" oninput="renderEvents()"><select id="storyYear" onchange="renderEvents()"><option value="">Todos los años</option></select><select id="storyMonth" onchange="renderEvents()"><option value="">Todos los meses</option><option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option><option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option><option value="07">Julio</option><option value="08">Agosto</option><option value="09">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select></div>
+  <div class="story-quickbar"><button type="button" onclick="toggleStoryNav()">☰ Secciones</button><button type="button" onclick="jumpTimeline('latest')">Más reciente ⇥</button></div><div class="story-quicknav" id="storyQuickNav"><button onclick="go('home')">⌂ Inicio</button><button onclick="go('album')">📸 Álbum</button><button onclick="go('todos')">☑ Lista</button><button onclick="go('reasons')">♥ 100 razones</button><button onclick="go('letter')">✉ Carta</button></div><div class="story-tools"><input id="storySearch" type="search" placeholder="Buscar recuerdos…" oninput="renderEvents()"><select id="storyYear" onchange="renderEvents()"><option value="">Todos los años</option></select><select id="storyMonth" onchange="renderEvents()"><option value="">Todos los meses</option><option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option><option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option><option value="07">Julio</option><option value="08">Agosto</option><option value="09">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select></div>
 <div id="timeline" class="timeline"></div>
-  <div class="story-menu">
+  <div class="story-bottom-jump"><button type="button" onclick="jumpTimeline('oldest')">⇤ Volver al recuerdo más antiguo</button></div><div class="story-menu">
    <button class="btn ghost" onclick="go('album')">📸 Ver álbum</button>
    <button class="btn ghost" onclick="go('todos')">☑ Nuestra lista</button>
    <button class="btn ghost" onclick="go('reasons')">♥ 100 razones</button>
