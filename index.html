@@ -280,6 +280,7 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
 @media(prefers-reduced-motion:reduce){.screen.active .screen-inner,.hero-heart{animation:none!important}.reveal-ready{opacity:1!important;transform:none!important}}
 
 .reasons-intro{max-width:700px;margin-bottom:20px}.reasons-progress{display:flex;align-items:center;gap:12px;margin:18px 0 24px}.reasons-progress-track{height:8px;flex:1;border-radius:99px;background:rgba(118,85,159,.1);overflow:hidden}.reasons-progress-fill{height:100%;width:100%;border-radius:inherit;background:var(--lilac-dark)}.reasons-count{font:700 11px Arial,sans-serif;color:var(--lilac-dark);white-space:nowrap}.reasons-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.reason-card{position:relative;padding:18px 18px 17px;min-height:125px}.reason-number{font:700 10px Arial,sans-serif;letter-spacing:.12em;color:var(--lilac-dark);text-transform:uppercase}.reason-card p{margin:11px 0 0;line-height:1.55}.reason-edit{position:absolute;right:9px;top:9px;border:1px solid var(--line);background:rgba(255,255,255,.9);border-radius:50%;width:32px;height:32px;color:var(--lilac-dark)}.reason-modal .modal-card{width:min(520px,100%)}.reason-modal textarea{min-height:130px;font-size:16px}.reasons-jump{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}.reasons-jump button{border:1px solid var(--line);background:#fff;border-radius:99px;padding:8px 11px;font:700 10px Arial,sans-serif;color:var(--muted)}@media(max-width:650px){.reasons-grid{grid-template-columns:1fr}.reason-card{min-height:auto}}
+.modal:not(.open),.upload-overlay:not(.show),.photo-lightbox:not(.open),.video-lightbox:not(.open){pointer-events:none!important}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
 </head>
@@ -520,6 +521,38 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
  </div>
 </div>
 
+<script>
+/* Core navigation and counter bootstrap kept independent from cloud features. */
+window.go=function(id){
+ document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
+ const target=document.getElementById(id);
+ if(target?.querySelector('.screen-inner'))target.querySelector('.screen-inner').scrollTop=0;
+ try{
+  if(id==='story'&&typeof renderEvents==='function')renderEvents();
+  if(id==='album'&&typeof loadAlbum==='function')loadAlbum();
+  if(id==='todos'&&typeof loadTodos==='function')loadTodos();
+  if(id==='letter'&&typeof loadLetter==='function')loadLetter();
+  if(id==='secrets'&&typeof renderSecrets==='function')renderSecrets();
+  if(id==='reasons'&&typeof loadReasons==='function')loadReasons();
+ }catch(e){console.error('Section load:',e)}
+};
+(function(){
+ const start=new Date(2025,8,26,15,49,0,0);
+ function add(base,y,m,d){const x=new Date(base);x.setFullYear(x.getFullYear()+y);x.setMonth(x.getMonth()+m);x.setDate(x.getDate()+d);return x}
+ function tick(){
+  const now=new Date(),main=document.getElementById('counterMain'),clock=document.getElementById('counterClock');if(!main||!clock)return;
+  if(now<start){main.textContent='Nuestra historia comienza el 26 de septiembre de 2025';clock.textContent='3:49 p. m.';return}
+  let cursor=new Date(start),years=0,months=0,days=0,next;
+  while((next=add(cursor,1,0,0))<=now){cursor=next;years++}
+  while((next=add(cursor,0,1,0))<=now){cursor=next;months++}
+  while((next=add(cursor,0,0,1))<=now){cursor=next;days++}
+  let ms=now-cursor,hours=Math.floor(ms/3600000);ms-=hours*3600000;let minutes=Math.floor(ms/60000);ms-=minutes*60000;let seconds=Math.floor(ms/1000);
+  const parts=[];if(years)parts.push(years+' '+(years===1?'año':'años'));if(months)parts.push(months+' '+(months===1?'mes':'meses'));parts.push(days+' '+(days===1?'día':'días'));
+  main.textContent=parts.join(' · ');clock.textContent=String(hours).padStart(2,'0')+' h · '+String(minutes).padStart(2,'0')+' min · '+String(seconds).padStart(2,'0')+' s';
+ }
+ document.addEventListener('DOMContentLoaded',()=>{tick();setInterval(tick,1000)});
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 let uiDialogResolve=null;
