@@ -75,7 +75,7 @@ h3{margin-bottom:8px}
 .album-edit{position:absolute;left:9px;top:9px;z-index:4;border:0;border-radius:999px;background:rgba(255,255,255,.92);padding:7px 10px;font:700 11px Arial,sans-serif;color:var(--ink)}
 .album-delete{position:absolute;right:9px;top:9px;border:0;border-radius:999px;background:rgba(255,255,255,.92);padding:7px 10px;font:700 11px Arial,sans-serif;color:var(--ink)}
 .album-empty{grid-column:1/-1;padding:32px;text-align:center;color:var(--muted)}
-.secret-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+
 .secret{padding:22px;min-height:150px}
 .secret.locked{filter:saturate(.3)}
 .secret button{margin-top:10px}
@@ -96,7 +96,7 @@ h3{margin-bottom:8px}
  .event-grid{grid-template-columns:1fr}
  .event img{height:190px}
  .album{grid-template-columns:repeat(2,1fr)}
- .secret-grid{grid-template-columns:1fr}
+ 
  .section-head{align-items:start;flex-direction:column}
 }
 
@@ -111,8 +111,8 @@ h3{margin-bottom:8px}
 .media-preview{width:100%;max-height:360px;object-fit:contain;border-radius:16px;background:var(--lilac-soft);display:block}
 video.media-preview{aspect-ratio:16/9}
 .audio-player{width:100%;margin-top:10px}
-.secret.revealed{background:linear-gradient(135deg,#fff,#f2eafb)}
-.secret .secret-body{color:var(--muted);line-height:1.55}
+
+
 .reveal-btn{margin-top:8px}
 .letter textarea{width:100%;min-height:260px;border:1px solid var(--line);border-radius:16px;padding:15px;resize:vertical;outline:none}
 .letter-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
@@ -525,7 +525,6 @@ window.go=function(id){
   if(id==='album'&&typeof loadAlbum==='function')loadAlbum();
   if(id==='todos'&&typeof loadTodos==='function')loadTodos();
   if(id==='letter'&&typeof loadLetter==='function')loadLetter();
-  if(id==='secrets'&&typeof renderSecrets==='function')renderSecrets();
   if(id==='reasons'&&typeof loadReasons==='function')loadReasons();
  }catch(e){console.error('Section load:',e)}
 };
@@ -572,7 +571,7 @@ function showConfirm(message,{title='Confirmar',danger=false,confirmText='Contin
 }
 const legacyRevealObserver=('IntersectionObserver' in window)?new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-visible');legacyRevealObserver.unobserve(entry.target)}})},{threshold:.08,rootMargin:'0px 0px -25px'}):null;
 function prepareReveals(root=document){
- root.querySelectorAll('.event,.album-item,.todo,.secret,.letter').forEach((el,i)=>{if(el.dataset.revealReady)return;el.dataset.revealReady='1';el.classList.add('reveal-in');el.style.transitionDelay=Math.min(i,5)*45+'ms';if(legacyRevealObserver)legacyRevealObserver.observe(el);else el.classList.add('is-visible')});
+ root.querySelectorAll('.event,.album-item,.todo,.letter').forEach((el,i)=>{if(el.dataset.revealReady)return;el.dataset.revealReady='1';el.classList.add('reveal-in');el.style.transitionDelay=Math.min(i,5)*45+'ms';if(legacyRevealObserver)legacyRevealObserver.observe(el);else el.classList.add('is-visible')});
 }
 /* Supabase
    Proyecto conectado: DavidMos260's Project.
@@ -585,16 +584,6 @@ function showToast(message){
  const el=document.getElementById('appToast');if(!el)return;
  el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);
  toastTimer=setTimeout(()=>el.classList.remove('show'),3200);
-}
-function askConfirm(message,title='¿Estás seguro?'){
- return new Promise(resolve=>{
-  const modal=document.getElementById('confirmModal'),accept=document.getElementById('confirmAccept'),cancel=document.getElementById('confirmCancel');
-  document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmMessage').textContent=message;
-  modal.classList.add('open');modal.setAttribute('aria-hidden','false');
-  const done=value=>{modal.classList.remove('open');modal.setAttribute('aria-hidden','true');accept.onclick=null;cancel.onclick=null;resolve(value)};
-  accept.onclick=()=>done(true);cancel.onclick=()=>done(false);
-  modal.onclick=e=>{if(e.target===modal)done(false)};
- });
 }
 function askText(title,initial='Nuestro momento'){
  return new Promise(resolve=>{
@@ -1108,38 +1097,6 @@ async function saveReason(){
  closeReasonModal();renderReasons();showToast('Razón guardada ♥');
 }
 document.getElementById('reasonModal')?.addEventListener('click',e=>{if(e.target.id==='reasonModal')closeReasonModal()});
-const SECRET_ITEMS=[
- {title:'Nuestra primera cita',text:'Un momento que marcó el inicio de todo lo que vino después.'},
- {title:'El primer regalo',text:'Un pequeño detalle que se quedó como parte de nuestra historia.'},
- {title:'El primer beso',text:'16 de septiembre de 2025. ❤️'},
- {title:'El famoso no del 18 de septiembre',text:'La historia no terminó ahí; todavía quedaban unos días para el sí.'},
- {title:'El sí del 26 de septiembre',text:'Seis días después llegó el sí. Y desde ahí, oficialmente, nosotros.'},
- {title:'El chocolate',text:'Un detalle pequeño puede terminar convertido en un recuerdo enorme.'},
- {title:'La sorpresa de cumpleaños',text:'Un cumpleaños que terminó significando mucho más de lo esperado.'},
- {title:'Nuestra foto',text:'Un instante que merece quedarse guardado para volver a verlo.'},
- {title:'Un momento inesperado',text:'Uno de esos pequeños momentos que terminan convirtiéndose en parte de nuestra historia.'},
- {title:'Nuestra canción',text:'Este espacio queda reservado para la canción que quieras que acompañe nuestra historia.'}
-];
-function renderSecrets(){
- const el=document.getElementById('secretGrid');
- if(!el)return;
- el.innerHTML=SECRET_ITEMS.map((x,i)=>`<article class="secret card" id="secret-${i}">
-   <div class="eyebrow">Recuerdo ${String(i+1).padStart(2,'0')}</div>
-   <h3>${escapeHtml(x.title)}</h3>
-   <div class="secret-body" id="secret-body-${i}" style="display:none">${escapeHtml(x.text)}</div>
-   <button class="btn ghost small reveal-btn" onclick="revealSecret(${i})">Descubrir</button>
- </article>`).join('');
- prepareReveals(el);
-}
-function revealSecret(i){
- const body=document.getElementById('secret-body-'+i);
- const card=document.getElementById('secret-'+i);
- const btn=card.querySelector('button');
- const open=body.style.display!=='none';
- body.style.display=open?'none':'block';
- card.classList.toggle('revealed',!open);
- btn.textContent=open?'Descubrir':'Ocultar';
-}
 async function saveLetter(){
  if(!canEditCore())return;
  const content=document.getElementById('letterText').value;
