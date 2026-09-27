@@ -128,6 +128,8 @@ video.media-preview{aspect-ratio:16/9}
 .image-help{font:12px Arial,sans-serif;color:var(--muted);line-height:1.45}
 .file-hidden{display:none}
 .admin-only{display:none!important}
+.core-editor-only{display:none!important}
+body.is-admin .core-editor-only,body.is-editor .core-editor-only{display:inline-flex!important}
 body.is-admin .admin-only{display:inline-flex!important}
 /* Fernanda: edición limitada a Nuestra historia, Álbum y Nuestra lista. */
 body.is-editor #story .admin-only,body.is-editor #album .admin-only,body.is-editor #todos .admin-only{display:inline-flex!important}
@@ -390,7 +392,7 @@ body.is-editor .admin-full-only{display:none!important}
   <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('home')">← Inicio</button></div>
   <div class="section-head">
    <div><h2>Nuestra historia</h2><p class="subtitle">Desde el 26 de septiembre de 2025.</p></div>
-   <button class="btn lilac admin-only" onclick="openEvent()">＋ Agregar recuerdo</button>
+   <button class="btn lilac core-editor-only" onclick="openEvent()">＋ Agregar recuerdo</button>
   </div>
   <div id="timeline" class="timeline"></div>
   <div class="story-menu">
@@ -407,7 +409,7 @@ body.is-editor .admin-full-only{display:none!important}
   <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
   <div class="section-head"><div><h2>Nuestra lista</h2><p class="subtitle">Cosas que todavía nos faltan vivir juntos.</p></div></div>
   <div class="card" style="padding:18px">
-   <div class="add-row admin-only"><input id="todoInput" placeholder="Agregar algo que quieran hacer juntos..."><button class="btn lilac" onclick="addTodo()">＋</button></div>
+   <div class="add-row core-editor-only"><input id="todoInput" placeholder="Agregar algo que quieran hacer juntos..."><button class="btn lilac" onclick="addTodo()">＋</button></div>
    <div class="progress-wrap"><div class="progress" id="progress"></div></div>
    <div id="todoCount" class="music-note"></div>
    <div id="todosList" class="list"></div>
@@ -419,7 +421,7 @@ body.is-editor .admin-full-only{display:none!important}
 <section class="screen" id="album">
  <div class="screen-inner">
   <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
-  <div class="section-head"><div><div class="eyebrow">Nuestros momentos</div><h2>Álbum</h2><p class="subtitle">Fotos y videos de nuestros momentos juntos.</p></div><button class="btn lilac admin-only" onclick="addAlbumMedia()">＋ Agregar foto o video</button></div>
+  <div class="section-head"><div><div class="eyebrow">Nuestros momentos</div><h2>Álbum</h2><p class="subtitle">Fotos y videos de nuestros momentos juntos.</p></div><button class="btn lilac core-editor-only" onclick="addAlbumMedia()">＋ Agregar foto o video</button></div>
   <div class="album" id="cloudAlbum"><div class="album-empty card">Cargando álbum…</div></div>
   <div class="footer-note">Las fotos y videos se guardan en la nube y están disponibles en todos los dispositivos.</div>
  </div>
@@ -471,6 +473,7 @@ body.is-editor .admin-full-only{display:none!important}
    <div class="admin-head"><div><div class="eyebrow">Centro de control</div><h3>Modo administrador</h3></div><span class="admin-dot" title="Sesión activa"></span></div>
    <p id="adminUserLabel">Sesión iniciada.</p>
    <div class="admin-shortcuts">
+    <button class="admin-shortcut" type="button" onclick="adminGo('story')"><span>♡</span><b>Historia</b><small>Línea del tiempo</small></button>
     <button class="admin-shortcut" type="button" onclick="adminGo('album')"><span>▧</span><b>Álbum</b><small>Fotos y videos</small></button>
     <button class="admin-shortcut" type="button" onclick="adminGo('todos')"><span>✓</span><b>Lista</b><small>Planes juntos</small></button>
     <button class="admin-shortcut admin-full-only" type="button" onclick="adminGo('letter')"><span>✉</span><b>Carta</b><small>Editar carta</small></button>
@@ -704,8 +707,8 @@ function renderAlbum(){
   const media=type==='video'
    ? `<video id="albumVideo${p.id}" src="${escapeHtml(p.image_url)}" controls playsinline preload="metadata"></video><button class="album-fullscreen" type="button" onclick="openVideoFullscreen('albumVideo${p.id}')" aria-label="Ver video en pantalla completa">⛶</button>`
    : `<img class="album-image" src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.title||'Fotografía')}" onclick="openPhotoLightbox(${p.id})">`;
-  const order=`<div class="album-order admin-only"><button type="button" onclick="moveAlbumItem(${p.id},-1)" aria-label="Mover antes" ${index===0?'disabled':''}>←</button><button type="button" onclick="moveAlbumItem(${p.id},1)" aria-label="Mover después" ${index===albumPhotos.length-1?'disabled':''}>→</button></div>`;
-  return `<article class="album-item">${media}<div class="album-caption">${escapeHtml(p.title||'Nuestro momento')}</div>${order}<button class="album-edit admin-only" type="button" onclick="editAlbumTitle(${p.id})">Editar</button><button class="album-delete admin-only" type="button" onclick="deleteAlbumPhoto(${p.id})">Eliminar</button></article>`;
+  const order=`<div class="album-order core-editor-only"><button type="button" onclick="moveAlbumItem(${p.id},-1)" aria-label="Mover antes" ${index===0?'disabled':''}>←</button><button type="button" onclick="moveAlbumItem(${p.id},1)" aria-label="Mover después" ${index===albumPhotos.length-1?'disabled':''}>→</button></div>`;
+  return `<article class="album-item">${media}<div class="album-caption">${escapeHtml(p.title||'Nuestro momento')}</div>${order}<button class="album-edit core-editor-only" type="button" onclick="editAlbumTitle(${p.id})">Editar</button><button class="album-delete core-editor-only" type="button" onclick="deleteAlbumPhoto(${p.id})">Eliminar</button></article>`;
  }).join('');
 }
 let activePhotoId=null;
@@ -887,7 +890,7 @@ function renderEvents(){
      <div class="event-grid">
        <div class="story-image-wrap">
          ${media}
-         <div class="story-image-actions admin-only">
+         <div class="story-image-actions core-editor-only">
            <button class="story-image-btn" type="button" onclick="changeEventImage(${e.id})">🖼️ ${image?'Cambiar':'Agregar'} foto/video</button>
          </div>
        </div>
@@ -895,7 +898,7 @@ function renderEvents(){
          <div class="event-date">${fmt(e.date)}</div>
          <h3>${escapeHtml(e.title)}</h3>
          <p>${escapeHtml(e.desc||'')}</p>
-         <div class="actions admin-only">
+         <div class="actions core-editor-only">
            <button class="btn ghost small" onclick="editEvent(${e.id})">Editar</button>
            <button class="btn ghost small" onclick="deleteEvent(${e.id})">Eliminar</button>
          </div>
@@ -1047,7 +1050,7 @@ function renderTodos(){
  let done=todos.filter(x=>x.done).length,total=todos.length;
  progress.style.width=(total?done/total*100:0)+'%';
  document.getElementById('todoCount').textContent=`${done} de ${total} completadas`;
- const list=document.getElementById('todosList');list.innerHTML=todos.map(t=>`<label class="todo card ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} ${canEditCore()?'':'disabled'} onchange="toggleTodo(${t.id})"><span>${escapeHtml(t.text)}</span><button class="btn ghost small admin-only" type="button" onclick="deleteTodo(${t.id})">×</button></label>`).join('');prepareReveals(list);
+ const list=document.getElementById('todosList');list.innerHTML=todos.map(t=>`<label class="todo card ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} ${canEditCore()?'':'disabled'} onchange="toggleTodo(${t.id})"><span>${escapeHtml(t.text)}</span><button class="btn ghost small core-editor-only" type="button" onclick="deleteTodo(${t.id})">×</button></label>`).join('');prepareReveals(list);
 }
 async function addTodo(){if(!canEditCore())return;let v=document.getElementById('todoInput').value.trim();if(!v)return;const {data,error}=await supabaseClient.from('couple_todos').insert({text:v,done:false,sort_order:todos.length}).select().single();if(error){showNotice('No se pudo agregar.');return}todos.push(data);document.getElementById('todoInput').value='';renderTodos()}
 async function toggleTodo(id){if(!canEditCore())return;let t=todos.find(x=>x.id===id);if(!t)return;const {data,error}=await supabaseClient.from('couple_todos').update({done:!t.done}).eq('id',id).select().single();if(error)return;Object.assign(t,data);renderTodos()}
