@@ -1118,6 +1118,7 @@ const SECRET_ITEMS=[
 ];
 function renderSecrets(){
  const el=document.getElementById('secretGrid');
+ if(!el)return;
  el.innerHTML=SECRET_ITEMS.map((x,i)=>`<article class="secret card" id="secret-${i}">
    <div class="eyebrow">Recuerdo ${String(i+1).padStart(2,'0')}</div>
    <h3>${escapeHtml(x.title)}</h3>
@@ -1185,7 +1186,7 @@ document.getElementById('musicSeek')?.addEventListener('click',e=>{if(!audioEl?.
 document.getElementById('musicVolume')?.addEventListener('input',e=>{if(!audioEl)return;audioEl.volume=Number(e.target.value);audioEl.muted=false;document.getElementById('musicMute').textContent=audioEl.volume===0?'🔇':'🔊'});
 document.getElementById('eventImage')?.addEventListener('change',previewEventImage);
 document.getElementById('adminToggle')?.addEventListener('click',toggleAdminPanel);
-renderSecrets();initSupabase();
+initSupabase();
 
 document.addEventListener('keydown',e=>{
  if(document.getElementById('photoLightbox')?.classList.contains('open')){
