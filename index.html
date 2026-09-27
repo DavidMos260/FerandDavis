@@ -613,14 +613,6 @@ function askText(title,initial='Nuestro momento'){
   modal.onclick=e=>{if(e.target===modal)done(null)};
  });
 }
-let revealObserver=null;
-function refreshRevealAnimations(root=document){
- if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
- if(!revealObserver)revealObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('reveal-visible');revealObserver.unobserve(entry.target)}}),{threshold:.08});
- root.querySelectorAll('.screen.active .card,.screen.active .event,.screen.active .album-item,.screen.active .secret').forEach((el,i)=>{
-  if(el.dataset.revealBound)return;el.dataset.revealBound='1';el.classList.add('reveal-ready');el.style.transitionDelay=Math.min(i,5)*45+'ms';revealObserver.observe(el);
- });
-}
 const SUPABASE_URL='https://ehyctjjdaqgxphlewdwq.supabase.co';
 const SUPABASE_ANON_KEY='sb_publishable_tJ-EEvB5KirznaGNFujxuQ__RkuI1ad';
 let supabaseClient=null;
@@ -913,7 +905,7 @@ function renderEvents(){
      </div>
    </article>`;
  }).join('');
- requestAnimationFrame(()=>refreshRevealAnimations(el));
+ requestAnimationFrame(()=>prepareReveals(el));
  if(!arr.length) el.innerHTML='<div class="empty card">Todavía no hay recuerdos. Agrega el primero. ❤️</div>';
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
