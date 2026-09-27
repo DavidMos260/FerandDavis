@@ -473,7 +473,7 @@ body.is-editor .admin-full-only{display:none!important}
    <div class="admin-head"><div><div class="eyebrow">Centro de control</div><h3>Modo administrador</h3></div><span class="admin-dot" title="Sesión activa"></span></div>
    <p id="adminUserLabel">Sesión iniciada.</p>
    <div class="admin-shortcuts">
-    <button class="admin-shortcut" type="button" onclick="adminGo('story')"><span>♡</span><b>Historia</b><small>Línea del tiempo</small></button>
+    <button class="admin-shortcut" type="button" onclick="adminGo('story')"><span>♡</span><b>Línea del tiempo</b><small>Nuestra historia</small></button>
     <button class="admin-shortcut" type="button" onclick="adminGo('album')"><span>▧</span><b>Álbum</b><small>Fotos y videos</small></button>
     <button class="admin-shortcut" type="button" onclick="adminGo('todos')"><span>✓</span><b>Lista</b><small>Planes juntos</small></button>
     <button class="admin-shortcut admin-full-only" type="button" onclick="adminGo('letter')"><span>✉</span><b>Carta</b><small>Editar carta</small></button>
@@ -713,8 +713,11 @@ function renderAlbum(){
 }
 let activePhotoId=null;
 function photoItems(){return albumPhotos.filter(p=>p.media_type!=='video')}
+function setPhotoLightboxNavigation(show){
+ document.querySelectorAll('.photo-lightbox-nav').forEach(btn=>btn.style.display=show?'':'none');
+}
 function openPhotoLightbox(id){
- const p=albumPhotos.find(x=>x.id===id&&x.media_type!=='video');if(!p)return;activePhotoId=id;
+ const p=albumPhotos.find(x=>x.id===id&&x.media_type!=='video');if(!p)return;activePhotoId=id;setPhotoLightboxNavigation(true);
  document.getElementById('photoLightboxImage').src=p.image_url;
  document.getElementById('photoLightboxImage').alt=p.title||'Fotografía';
  document.getElementById('photoLightboxTitle').textContent=p.title||'Nuestro momento';
@@ -723,7 +726,7 @@ function openPhotoLightbox(id){
 function openEventPhoto(id){
  const e=events.find(x=>x.id===id&&x.media_type!=='video');if(!e)return;
  const img=document.getElementById('photoLightboxImage'),title=document.getElementById('photoLightboxTitle'),box=document.getElementById('photoLightbox');
- img.src=e.image_url||e.image||'';img.alt=e.title||'Recuerdo';title.textContent=e.title||'Recuerdo';activePhotoId=null;box.classList.add('open');box.setAttribute('aria-hidden','false');
+ img.src=e.image_url||e.image||'';img.alt=e.title||'Recuerdo';title.textContent=e.title||'Recuerdo';activePhotoId=null;setPhotoLightboxNavigation(false);box.classList.add('open');box.setAttribute('aria-hidden','false');
 }
 function closePhotoLightbox(){const box=document.getElementById('photoLightbox');box.classList.remove('open');box.setAttribute('aria-hidden','true');document.getElementById('photoLightboxImage').removeAttribute('src');activePhotoId=null}
 function stepPhoto(delta){const arr=photoItems();if(!arr.length)return;let i=arr.findIndex(x=>x.id===activePhotoId);i=(i+delta+arr.length)%arr.length;openPhotoLightbox(arr[i].id)}
