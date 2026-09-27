@@ -866,7 +866,7 @@ async function uploadEventImage(file){
    });
  }else{
    setUploadProgress(20,'Subiendo imagen…');
-   const {error}=await window.supabaseClient.storage.from('event-images').upload(path,file,{upsert:true,contentType:file.type});
+   const {error}=await window.supabaseClient.storage.from('event-images').upload(path,file,{upsert:false,contentType:file.type});
    if(error)throw error;setUploadProgress(100,'Subida completada.');
  }
  const {data}=window.supabaseClient.storage.from('event-images').getPublicUrl(path);
