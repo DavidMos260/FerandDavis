@@ -510,10 +510,11 @@ body.is-editor .admin-full-only{display:none!important}
    <div><label>Título</label><input id="eventTitle" placeholder="Ej. Nuestra primera cita"></div>
    <div><label>Descripción</label><textarea id="eventDesc" placeholder="Un pequeño recuerdo..."></textarea></div>
    <div>
-    <label>Imagen del recuerdo</label>
-    <input type="file" id="eventImage" accept="image/jpeg,image/png,image/webp,image/gif">
+    <label>Foto o video del recuerdo</label>
+    <input type="file" id="eventImage" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime">
     <div id="eventImagePreviewWrap" style="display:none;margin-top:12px">
      <img id="eventImagePreview" alt="Vista previa del recuerdo" style="width:100%;max-height:280px;object-fit:cover;border-radius:16px">
+     <video id="eventVideoPreview" controls playsinline style="display:none;width:100%;max-height:280px;border-radius:16px"></video>
     </div>
    </div>
   </div>
@@ -676,7 +677,8 @@ function normalizeEvent(row,fallback={}){
    date:row.date??fallback.date,
    title:row.title??fallback.title,
    desc:row.description??row.desc??fallback.desc??'',
-   image_url:row.image_url??fallback.image_url??fallback.image??''
+   image_url:row.image_url??fallback.image_url??fallback.image??'',
+   media_type:row.media_type??fallback.media_type??'image'
  };
 }
 async function initSupabase(){
@@ -731,6 +733,11 @@ function openPhotoLightbox(id){
  document.getElementById('photoLightboxImage').alt=p.title||'Fotografía';
  document.getElementById('photoLightboxTitle').textContent=p.title||'Nuestro momento';
  const box=document.getElementById('photoLightbox');box.classList.add('open');box.setAttribute('aria-hidden','false');
+}
+function openEventPhoto(id){
+ const e=events.find(x=>x.id===id&&x.media_type!=='video');if(!e)return;
+ const img=document.getElementById('photoLightboxImage'),title=document.getElementById('photoLightboxTitle'),box=document.getElementById('photoLightbox');
+ img.src=e.image_url||e.image||'';img.alt=e.title||'Recuerdo';title.textContent=e.title||'Recuerdo';activePhotoId=null;box.classList.add('open');box.setAttribute('aria-hidden','false');
 }
 function closePhotoLightbox(){const box=document.getElementById('photoLightbox');box.classList.remove('open');box.setAttribute('aria-hidden','true');document.getElementById('photoLightboxImage').removeAttribute('src');activePhotoId=null}
 function stepPhoto(delta){const arr=photoItems();if(!arr.length)return;let i=arr.findIndex(x=>x.id===activePhotoId);i=(i+delta+arr.length)%arr.length;openPhotoLightbox(arr[i].id)}
@@ -889,14 +896,16 @@ function renderEvents(){
  el.innerHTML=arr.map(e=>{
    const image=e.image_url||e.image||'';
    const media=image
-     ? `<img class="event-photo" src="${escapeHtml(image)}" alt="${escapeHtml(e.title)}">`
+     ? (e.media_type==='video'
+       ? `<div class="album-video-wrap"><video class="event-photo" id="event-video-${e.id}" src="${escapeHtml(image)}" preload="metadata" playsinline></video><button class="album-video-open" type="button" onclick="openVideoFullscreen('event-video-${e.id}')">▶ Ver video</button></div>`
+       : `<img class="event-photo" src="${escapeHtml(image)}" alt="${escapeHtml(e.title)}" role="button" tabindex="0" onclick="openEventPhoto(${e.id})" onkeydown="if(event.key==='Enter'||event.key===' ')openEventPhoto(${e.id})">`)
      : `<div class="event-placeholder">♡</div>`;
    return `<article class="event card">
      <div class="event-grid">
        <div class="story-image-wrap">
          ${media}
          <div class="story-image-actions admin-only">
-           <button class="story-image-btn" type="button" onclick="changeEventImage(${e.id})">🖼️ ${image?'Cambiar':'Agregar'} imagen</button>
+           <button class="story-image-btn" type="button" onclick="changeEventImage(${e.id})">🖼️ ${image?'Cambiar':'Agregar'} foto/video</button>
          </div>
        </div>
        <div>
@@ -938,24 +947,23 @@ function editEvent(id){
  document.getElementById('eventDesc').value=e.desc||'';
  document.getElementById('eventImage').value='';
  modal.dataset.id=id;
- setEventImagePreview(e.image_url||e.image||'');
+ setEventImagePreview(e.image_url||e.image||'',e.media_type||'image');
  modal.classList.add('open');
 }
 function closeEvent(){document.getElementById('eventModal').classList.remove('open')}
 function clearEventImagePreview(){
- const wrap=document.getElementById('eventImagePreviewWrap');
- const img=document.getElementById('eventImagePreview');
- wrap.style.display='none'; img.removeAttribute('src');
+ const wrap=document.getElementById('eventImagePreviewWrap'),img=document.getElementById('eventImagePreview'),video=document.getElementById('eventVideoPreview');
+ wrap.style.display='none';img.style.display='none';img.removeAttribute('src');video.pause();video.style.display='none';video.removeAttribute('src');video.load();
 }
-function setEventImagePreview(src){
- const wrap=document.getElementById('eventImagePreviewWrap');
- const img=document.getElementById('eventImagePreview');
- if(src){img.src=src;wrap.style.display='block'}else clearEventImagePreview();
+function setEventImagePreview(src,type='image'){
+ const wrap=document.getElementById('eventImagePreviewWrap'),img=document.getElementById('eventImagePreview'),video=document.getElementById('eventVideoPreview');
+ clearEventImagePreview();if(!src)return;wrap.style.display='block';if(type==='video'){video.src=src;video.style.display='block'}else{img.src=src;img.style.display='block'}
 }
 function previewEventImage(){
  const f=document.getElementById('eventImage').files[0];
  if(!f)return;
- setEventImagePreview(URL.createObjectURL(f));
+ const ext=(f.name.split('.').pop()||'').toLowerCase();const type=(f.type.startsWith('video/')||['mp4','mov','m4v','webm','avi'].includes(ext))?'video':'image';
+ setEventImagePreview(URL.createObjectURL(f),type);
 }
 async function saveEvent(){
  if(!canEditCore()){showNotice('Inicia sesión con una cuenta con permisos de edición.');return}
@@ -968,12 +976,12 @@ async function saveEvent(){
 
  if(window.supabaseClient){
    try{
-     let image_url=null;
-     if(file) image_url=await uploadEventImage(file);
+     let image_url=null,media_type=null;
+     if(file){const ext=(file.name.split('.').pop()||'').toLowerCase();media_type=(file.type.startsWith('video/')||['mp4','mov','m4v','webm','avi'].includes(ext))?'video':'image';if(media_type==='video'&&file.size>50*1024*1024)throw new Error('El video supera el límite de 50 MB.');image_url=await uploadEventImage(file)}
      if(id){
        const previous=events.find(x=>x.id===id);const oldImage=previous?.image_url||previous?.image||'';
        const payload={date,title,description:desc};
-       if(image_url) payload.image_url=image_url;
+       if(image_url){payload.image_url=image_url;payload.media_type=media_type;}
        const {data,error}=await window.supabaseClient.from('events').update(payload).eq('id',id).select().single();
        if(error)throw error;
        if(image_url&&oldImage&&oldImage!==image_url){try{await removeStoredFile(oldImage,'event-images')}catch(cleanErr){console.warn('No se pudo limpiar la imagen anterior',cleanErr)}}
@@ -981,7 +989,7 @@ async function saveEvent(){
        if(idx>=0)events[idx]=normalizeEvent(data,events[idx]);
      }else{
        const payload={date,title,description:desc};
-       if(image_url)payload.image_url=image_url;
+       if(image_url){payload.image_url=image_url;payload.media_type=media_type;}
        const {data,error}=await window.supabaseClient.from('events').insert(payload).select().single();
        if(error)throw error;
        events.push(normalizeEvent(data));
@@ -1012,7 +1020,7 @@ async function changeEventImage(id){
  const e=events.find(x=>x.id===id);
  if(!e)return;
  const input=document.createElement('input');
- input.type='file';input.accept='image/*';input.className='file-hidden';
+ input.type='file';input.accept='image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime';input.className='file-hidden';
  document.body.appendChild(input);
  input.addEventListener('change',async()=>{
    const file=input.files[0];
@@ -1020,9 +1028,9 @@ async function changeEventImage(id){
    if(!file)return;
    if(window.supabaseClient){
      try{
-       const oldImage=e.image_url||e.image||'';
+       const oldImage=e.image_url||e.image||'';const ext=(file.name.split('.').pop()||'').toLowerCase();const media_type=(file.type.startsWith('video/')||['mp4','mov','m4v','webm','avi'].includes(ext))?'video':'image';if(media_type==='video'&&file.size>50*1024*1024)throw new Error('El video supera el límite de 50 MB.');
        const image_url=await uploadEventImage(file);
-       const {data,error}=await window.supabaseClient.from('events').update({image_url}).eq('id',id).select().single();
+       const {data,error}=await window.supabaseClient.from('events').update({image_url,media_type}).eq('id',id).select().single();
        if(error)throw error;
        if(oldImage&&oldImage!==image_url){try{await removeStoredFile(oldImage,'event-images')}catch(cleanErr){console.warn('No se pudo limpiar la imagen anterior',cleanErr)}}
        const idx=events.findIndex(x=>x.id===id);
