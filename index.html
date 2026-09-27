@@ -729,6 +729,15 @@ function openPhotoLightbox(id){
 }
 let activeEventPhotoId=null;
 function eventPhotoItems(){return [...events].filter(e=>(e.image_url||e.image)&&e.media_type!=='video').sort((a,b)=>a.date.localeCompare(b.date))}
+function openEventPhotoDirect(url,title,id,date){
+ const img=document.getElementById('photoLightboxImage'),label=document.getElementById('photoLightboxTitle'),box=document.getElementById('photoLightbox');
+ if(!img||!label||!box||!url)return;
+ activePhotoId=null;activeEventPhotoId=id;
+ img.src=url;img.alt=title||'Recuerdo';
+ label.textContent=(date?fmt(date)+' · ':'')+(title||'Recuerdo');
+ setPhotoLightboxNavigation(eventPhotoItems().length>1);
+ box.classList.add('open');box.setAttribute('aria-hidden','false');
+}
 function openEventPhoto(id){
  const e=eventPhotoItems().find(x=>String(x.id)===String(id));if(!e)return;
  const img=document.getElementById('photoLightboxImage'),title=document.getElementById('photoLightboxTitle'),box=document.getElementById('photoLightbox');
@@ -896,7 +905,7 @@ function renderEvents(){
    const media=image
      ? (e.media_type==='video'
        ? `<div class="album-video-wrap"><video class="event-photo" id="event-video-${e.id}" src="${escapeHtml(image)}" preload="metadata" playsinline></video><button class="album-video-open" type="button" onclick="openVideoFullscreen('event-video-${e.id}')">▶ Ver video</button></div>`
-       : `<img class="event-photo" src="${escapeHtml(image)}" alt="${escapeHtml(e.title)}" role="button" tabindex="0" onclick="openEventPhoto(${e.id})" onkeydown="if(event.key==='Enter'||event.key===' ')openEventPhoto(${e.id})">`)
+       : `<img class="event-photo" src="${escapeHtml(image)}" alt="${escapeHtml(e.title)}" role="button" tabindex="0" onclick="openEventPhotoDirect(this.src,this.alt,'${e.id}','${escapeHtml(e.date)}')" onkeydown="if(event.key==='Enter'||event.key===' ')openEventPhotoDirect(this.src,this.alt,'${e.id}','${escapeHtml(e.date)}')">`)
      : `<div class="event-placeholder">♡</div>`;
    return `<article class="event card">
      <div class="event-grid">
