@@ -677,7 +677,6 @@ async function initSupabase(){
  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
  window.supabaseClient=supabaseClient;
  const {data:{session}}=await supabaseClient.auth.getSession();
- setAdminState(session);
  supabaseClient.auth.onAuthStateChange((_event,newSession)=>setAdminState(newSession));
  try{
    const {data,error}=await supabaseClient.from('events').select('*').order('date',{ascending:true}).order('id',{ascending:true});
@@ -691,6 +690,7 @@ async function initSupabase(){
    events=[];
    renderEvents();
  }
+ setAdminState(session);
  await Promise.all([loadAlbum(),loadTodos(),loadLetter(),loadSiteMusic(),loadReasons()]);
 }
 async function loadAlbum(){
