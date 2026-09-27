@@ -225,6 +225,7 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
 .admin-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.admin-head h3{margin:3px 0 0}.admin-dot{width:10px;height:10px;border-radius:50%;background:#68a978;box-shadow:0 0 0 5px rgba(104,169,120,.12);margin:8px 4px}.admin-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}.admin-shortcut{border:1px solid var(--line);background:#fff;border-radius:15px;padding:11px;text-align:left;color:var(--ink);display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center}.admin-shortcut>span{grid-row:1/3;font-size:18px;color:var(--lilac-dark)}.admin-shortcut b{font:700 12px Arial,sans-serif}.admin-shortcut small{font:10px Arial,sans-serif;color:var(--muted);margin-top:2px}.admin-shortcut:hover{background:var(--lilac-soft)}.admin-logout{width:100%;justify-content:center}.admin-session-note{font:11px Arial,sans-serif;color:var(--muted)}@media(max-width:380px){.admin-shortcuts{grid-template-columns:1fr}}
+.video-lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:48px;height:48px;border:0;border-radius:50%;background:rgba(255,255,255,.92);color:#2c2432;font-size:28px;display:grid;place-items:center}.video-lightbox-prev{left:16px}.video-lightbox-next{right:16px}.video-lightbox-title{position:absolute;left:72px;right:72px;bottom:22px;text-align:center;color:#fff;font:600 13px Arial,sans-serif}@media(max-width:650px){.video-lightbox-nav{top:auto;bottom:18px;transform:none}.video-lightbox-prev{left:18px}.video-lightbox-next{right:18px}.video-lightbox-title{bottom:31px}}
 .photo-lightbox{position:fixed;inset:0;z-index:640;background:rgba(15,10,19,.94);display:none;align-items:center;justify-content:center;padding:64px 70px 76px}
 .photo-lightbox.open{display:flex}
 .photo-lightbox img{max-width:100%;max-height:calc(100dvh - 145px);object-fit:contain;border-radius:10px;box-shadow:0 20px 70px rgba(0,0,0,.38)}
@@ -309,7 +310,7 @@ body.is-editor .admin-full-only{display:none!important}
   <div class="upload-file" id="uploadFile"></div>
  </div>
 </div>
-<div id="videoLightbox" class="video-lightbox" aria-hidden="true"><button class="video-lightbox-close" type="button" onclick="closeVideoFullscreen()" aria-label="Cerrar video">×</button><video id="fullscreenVideo" controls playsinline></video></div>
+<div id="videoLightbox" class="video-lightbox" aria-hidden="true"><button class="video-lightbox-close" type="button" onclick="closeMediaViewer()" aria-label="Cerrar video">×</button><button class="video-lightbox-nav video-lightbox-prev" type="button" onclick="stepMedia(-1)" aria-label="Elemento anterior">‹</button><video id="fullscreenVideo" controls playsinline></video><button class="video-lightbox-nav video-lightbox-next" type="button" onclick="stepMedia(1)" aria-label="Elemento siguiente">›</button><div class="video-lightbox-title" id="videoLightboxTitle"></div></div>
 <div id="photoLightbox" class="photo-lightbox" aria-hidden="true">
  <button class="photo-lightbox-close" type="button" onclick="closePhotoLightbox()" aria-label="Cerrar fotografía">×</button>
  <button class="photo-lightbox-nav photo-lightbox-prev" type="button" onclick="stepPhoto(-1)" aria-label="Fotografía anterior">‹</button>
@@ -709,7 +710,7 @@ function renderAlbum(){
  el.innerHTML=albumPhotos.map((p,index)=>{
   const type=p.media_type==='video'?'video':'image';
   const media=type==='video'
-   ? `<video id="albumVideo${p.id}" src="${escapeHtml(p.image_url)}" controls playsinline preload="metadata"></video><button class="album-fullscreen" type="button" onclick="openVideoFullscreen('albumVideo${p.id}')" aria-label="Ver video en pantalla completa">⛶</button>`
+   ? `<video id="albumVideo${p.id}" src="${escapeHtml(p.image_url)}" controls playsinline preload="metadata"></video><button class="album-fullscreen" type="button" onclick="openAlbumMedia(${p.id})" aria-label="Ver video en pantalla completa">⛶</button>`
    : `<img class="album-image" src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.title||'Fotografía')}" onclick="openPhotoLightbox(${p.id})">`;
   const order=`<div class="album-order core-editor-only"><button type="button" onclick="moveAlbumItem(${p.id},-1)" aria-label="Mover antes" ${index===0?'disabled':''}>←</button><button type="button" onclick="moveAlbumItem(${p.id},1)" aria-label="Mover después" ${index===albumPhotos.length-1?'disabled':''}>→</button></div>`;
   return `<article class="album-item">${media}<div class="album-caption">${escapeHtml(p.title||'Nuestro momento')}</div>${order}<button class="album-edit core-editor-only" type="button" onclick="editAlbumTitle(${p.id})">Editar</button><button class="album-delete core-editor-only" type="button" onclick="deleteAlbumPhoto(${p.id})">Eliminar</button></article>`;
@@ -717,11 +718,39 @@ function renderAlbum(){
 }
 let activePhotoId=null;
 function photoItems(){return albumPhotos.filter(p=>p.media_type!=='video')}
+let activeMediaContext=null,activeMediaId=null;
+function albumMediaItems(){return albumPhotos}
+function eventMediaItems(){return [...events].filter(e=>e.image_url||e.image).sort((a,b)=>a.date.localeCompare(b.date))}
+function closeMediaViewer(){
+ closePhotoLightbox();
+ const box=document.getElementById('videoLightbox'),player=document.getElementById('fullscreenVideo');
+ if(player){player.pause();player.removeAttribute('src');player.load()}
+ if(box){box.classList.remove('open');box.setAttribute('aria-hidden','true')}
+}
+function showMediaItem(item,context){
+ if(!item)return;activeMediaContext=context;activeMediaId=item.id;
+ const isVideo=item.media_type==='video',url=item.image_url||item.image||'',title=context==='timeline'?((item.date?fmt(item.date)+' · ':'')+(item.title||'Recuerdo')):(item.title||'Nuestro momento');
+ if(isVideo){
+  const pbox=document.getElementById('photoLightbox');pbox.classList.remove('open');pbox.setAttribute('aria-hidden','true');
+  const box=document.getElementById('videoLightbox'),player=document.getElementById('fullscreenVideo'),label=document.getElementById('videoLightboxTitle');
+  player.src=url;label.textContent=title;box.classList.add('open');box.setAttribute('aria-hidden','false');player.play().catch(()=>{});
+ }else{
+  const vbox=document.getElementById('videoLightbox'),player=document.getElementById('fullscreenVideo');player.pause();vbox.classList.remove('open');vbox.setAttribute('aria-hidden','true');
+  const img=document.getElementById('photoLightboxImage'),label=document.getElementById('photoLightboxTitle'),box=document.getElementById('photoLightbox');
+  img.src=url;img.alt=item.title||'Fotografía';label.textContent=title;box.classList.add('open');box.setAttribute('aria-hidden','false');setPhotoLightboxNavigation(true);
+ }
+}
+function openAlbumMedia(id){const item=albumMediaItems().find(x=>String(x.id)===String(id));showMediaItem(item,'album')}
+function openEventMedia(id){const item=eventMediaItems().find(x=>String(x.id)===String(id));showMediaItem(item,'timeline')}
+function stepMedia(delta){
+ const arr=activeMediaContext==='timeline'?eventMediaItems():albumMediaItems();if(!arr.length)return;
+ let i=arr.findIndex(x=>String(x.id)===String(activeMediaId));if(i<0)i=0;i=(i+delta+arr.length)%arr.length;showMediaItem(arr[i],activeMediaContext||'album');
+}
 function setPhotoLightboxNavigation(show){
  document.querySelectorAll('.photo-lightbox-nav').forEach(btn=>btn.style.display=show?'':'none');
 }
 function openPhotoLightbox(id){
- const p=albumPhotos.find(x=>x.id===id&&x.media_type!=='video');if(!p)return;activePhotoId=id;setPhotoLightboxNavigation(true);
+ const p=albumPhotos.find(x=>x.id===id&&x.media_type!=='video');if(!p)return;activeMediaContext='album';activeMediaId=p.id;activePhotoId=id;setPhotoLightboxNavigation(true);
  document.getElementById('photoLightboxImage').src=p.image_url;
  document.getElementById('photoLightboxImage').alt=p.title||'Fotografía';
  document.getElementById('photoLightboxTitle').textContent=p.title||'Nuestro momento';
@@ -732,7 +761,7 @@ function eventPhotoItems(){return [...events].filter(e=>(e.image_url||e.image)&&
 function openEventPhotoDirect(url,title,id,date){
  const img=document.getElementById('photoLightboxImage'),label=document.getElementById('photoLightboxTitle'),box=document.getElementById('photoLightbox');
  if(!img||!label||!box||!url)return;
- activePhotoId=null;activeEventPhotoId=id;
+ activeMediaContext='timeline';activeMediaId=id;activePhotoId=null;activeEventPhotoId=id;
  img.src=url;img.alt=title||'Recuerdo';
  label.textContent=(date?fmt(date)+' · ':'')+(title||'Recuerdo');
  setPhotoLightboxNavigation(eventPhotoItems().length>1);
@@ -745,6 +774,7 @@ function openEventPhoto(id){
 }
 function closePhotoLightbox(){const box=document.getElementById('photoLightbox');box.classList.remove('open');box.setAttribute('aria-hidden','true');document.getElementById('photoLightboxImage').removeAttribute('src');activePhotoId=null;activeEventPhotoId=null}
 function stepPhoto(delta){
+ if(activeMediaContext){stepMedia(delta);return}
  if(activeEventPhotoId!==null){const arr=eventPhotoItems();if(!arr.length)return;let i=arr.findIndex(x=>String(x.id)===String(activeEventPhotoId));i=(i+delta+arr.length)%arr.length;openEventPhoto(arr[i].id);return}
  const arr=photoItems();if(!arr.length)return;let i=arr.findIndex(x=>x.id===activePhotoId);i=(i+delta+arr.length)%arr.length;openPhotoLightbox(arr[i].id)
 }
@@ -904,7 +934,7 @@ function renderEvents(){
    const image=e.image_url||e.image||'';
    const media=image
      ? (e.media_type==='video'
-       ? `<div class="album-video-wrap"><video class="event-photo" id="event-video-${e.id}" src="${escapeHtml(image)}" preload="metadata" playsinline></video><button class="album-video-open" type="button" onclick="openVideoFullscreen('event-video-${e.id}')">▶ Ver video</button></div>`
+       ? `<div class="album-video-wrap"><video class="event-photo" id="event-video-${e.id}" src="${escapeHtml(image)}" preload="metadata" playsinline></video><button class="album-video-open" type="button" onclick="openEventMedia(${e.id})">▶ Ver video</button></div>`
        : `<img class="event-photo" src="${escapeHtml(image)}" alt="${escapeHtml(e.title)}" role="button" tabindex="0" onclick="openEventPhotoDirect(this.src,this.alt,'${e.id}','${escapeHtml(e.date)}')" onkeydown="if(event.key==='Enter'||event.key===' ')openEventPhotoDirect(this.src,this.alt,'${e.id}','${escapeHtml(e.date)}')">`)
      : `<div class="event-placeholder">♡</div>`;
    return `<article class="event card">
