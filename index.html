@@ -375,31 +375,13 @@ body.is-editor .admin-full-only{display:none!important}
    <div class="love-counter-hint">Desde el 26 de septiembre de 2025 · 3:49 p. m. · Toca para ver más</div>
    <div class="counter-special" id="counterSpecial"></div>
   </button>
-  <button class="btn lilac" onclick="go('story')">Comenzar</button>
+  <button class="btn lilac" onclick="go('album')">Comenzar</button>
  </div>
 </section>
-
-<section class="screen" id="story">
- <div class="screen-inner">
-  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('home')">← Inicio</button></div>
-  <div class="section-head">
-   <div><h2>Nuestra historia</h2><p class="subtitle">Desde el 26 de septiembre de 2025.</p></div>
-   <button class="btn lilac admin-only" onclick="openEvent()">＋ Agregar recuerdo</button>
-  </div>
-  <div id="timeline" class="timeline"></div>
-  <div class="actions">
-   <button class="btn ghost" onclick="go('album')">📸 Ver álbum</button>
-   <button class="btn ghost" onclick="go('todos')">☑ Nuestra lista</button>
-    <button class="btn ghost" onclick="go('reasons')">♥ 100 razones</button>
-    <button class="btn ghost" onclick="go('secrets')">🔐 Recuerdos</button>
-  </div>
- </div>
-</section>
-
 
 <section class="screen" id="todos">
  <div class="screen-inner">
-  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
+  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('home')">← Inicio</button></div>
   <div class="section-head"><div><h2>Nuestra lista</h2><p class="subtitle">Cosas que todavía nos faltan vivir juntos.</p></div></div>
   <div class="card" style="padding:18px">
    <div class="add-row admin-only"><input id="todoInput" placeholder="Agregar algo que quieran hacer juntos..."><button class="btn lilac" onclick="addTodo()">＋</button></div>
@@ -413,7 +395,7 @@ body.is-editor .admin-full-only{display:none!important}
 
 <section class="screen" id="album">
  <div class="screen-inner">
-  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
+  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('home')">← Inicio</button></div>
   <div class="section-head"><div><div class="eyebrow">Nuestros momentos</div><h2>Álbum</h2><p class="subtitle">Fotos y videos de nuestros momentos juntos.</p></div><button class="btn lilac admin-only" onclick="addAlbumMedia()">＋ Agregar foto o video</button></div>
   <div class="album" id="cloudAlbum"><div class="album-empty card">Cargando álbum…</div></div>
   <div class="footer-note">Las fotos y videos se guardan en la nube y están disponibles en todos los dispositivos.</div>
@@ -423,19 +405,19 @@ body.is-editor .admin-full-only{display:none!important}
 
 <section class="screen" id="reasons">
  <div class="screen-inner">
-  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
+  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('home')">← Inicio</button></div>
   <h2>100 razones para estar contigo</h2>
   <p class="subtitle reasons-intro">Un espacio para ir escribiendo, poco a poco, cada una de mis razones.</p>
   <div class="reasons-progress"><div class="reasons-progress-track"><div class="reasons-progress-fill" id="reasonsProgressFill"></div></div><div class="reasons-count" id="reasonsCount">0 de 100 ♥</div></div>
 
   <div class="reasons-grid" id="reasonsGrid"><div class="card reason-card">Cargando razones…</div></div>
-  <div class="actions"><button class="btn ghost" onclick="go('story')">← Volver a nuestra historia</button><button class="btn lilac" onclick="go('secrets')">10 cosas que quiero que recuerdes →</button></div>
+  <div class="actions"><button class="btn ghost" onclick="go('home')">← Volver a nuestra historia</button><button class="btn lilac" onclick="go('secrets')">10 cosas que quiero que recuerdes →</button></div>
  </div>
 </section>
 
 <section class="screen" id="secrets">
  <div class="screen-inner">
-  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
+  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('home')">← Inicio</button></div>
   <h2>10 cosas que quiero que recuerdes</h2>
   <p class="subtitle">Toca cada recuerdo para descubrirlo.</p>
   <div class="secret-grid" id="secretGrid"></div>
@@ -465,7 +447,7 @@ body.is-editor .admin-full-only{display:none!important}
 <div class="admin-access">
  <div class="admin-panel card" id="adminPanel">
   <div id="adminLoggedOut">
-   <h3>Administración</h3><p>Inicia sesión para editar Nuestra historia.</p>
+   <h3>Administración</h3><p>Inicia sesión para administrar la página.</p>
    <div class="admin-form">
     <input type="text" id="adminEmail" autocomplete="username" placeholder="Usuario">
     <input type="password" id="adminPassword" autocomplete="current-password" placeholder="Contraseña">
@@ -476,7 +458,6 @@ body.is-editor .admin-full-only{display:none!important}
    <div class="admin-head"><div><div class="eyebrow">Centro de control</div><h3>Modo administrador</h3></div><span class="admin-dot" title="Sesión activa"></span></div>
    <p id="adminUserLabel">Sesión iniciada.</p>
    <div class="admin-shortcuts">
-    <button class="admin-shortcut" type="button" onclick="adminGo('story')"><span>♡</span><b>Historia</b><small>Recuerdos</small></button>
     <button class="admin-shortcut" type="button" onclick="adminGo('album')"><span>▧</span><b>Álbum</b><small>Fotos y videos</small></button>
     <button class="admin-shortcut" type="button" onclick="adminGo('todos')"><span>✓</span><b>Lista</b><small>Planes juntos</small></button>
     <button class="admin-shortcut admin-full-only" type="button" onclick="adminGo('letter')"><span>✉</span><b>Carta</b><small>Editar carta</small></button>
