@@ -129,6 +129,8 @@ video.media-preview{aspect-ratio:16/9}
 .file-hidden{display:none}
 .admin-only{display:none!important}
 body.is-admin .admin-only{display:inline-flex!important}
+/* Fernanda: edición limitada a Nuestra historia, Álbum y Nuestra lista. */
+body.is-editor #story .admin-only,body.is-editor #album .admin-only,body.is-editor #todos .admin-only{display:inline-flex!important}
 .admin-access{position:fixed;left:18px;bottom:18px;z-index:150;pointer-events:auto}
 .admin-access *{pointer-events:auto}
 .admin-toggle{border:1px solid var(--line);background:rgba(255,255,255,.92);color:var(--muted);border-radius:999px;padding:9px 13px;font:600 11px Arial,sans-serif;box-shadow:var(--shadow)}
@@ -1098,13 +1100,13 @@ async function saveReason(){
 }
 document.getElementById('reasonModal')?.addEventListener('click',e=>{if(e.target.id==='reasonModal')closeReasonModal()});
 async function saveLetter(){
- if(!canEditCore())return;
+ if(!isAdmin)return;
  const content=document.getElementById('letterText').value;
  const {error}=await supabaseClient.from('couple_letter').upsert({id:1,content,updated_at:new Date().toISOString()});
  document.getElementById('letterStatus').textContent=error?'No se pudo guardar.':'Carta guardada en la nube.';
 }
 async function clearLetter(){
- if(!canEditCore())return;if(!await showConfirm('¿Borrar la carta guardada?',{title:'Borrar carta',danger:true,confirmText:'Borrar'}))return;
+ if(!isAdmin)return;if(!await showConfirm('¿Borrar la carta guardada?',{title:'Borrar carta',danger:true,confirmText:'Borrar'}))return;
  document.getElementById('letterText').value='';await saveLetter();
 }
 async function loadLetter(){
