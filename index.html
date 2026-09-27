@@ -227,10 +227,7 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
 .photo-lightbox-close,.photo-lightbox-nav{position:absolute;border:0;border-radius:50%;background:rgba(255,255,255,.92);color:#2c2432;display:grid;place-items:center;box-shadow:0 8px 25px rgba(0,0,0,.18)}
 .photo-lightbox-close{right:18px;top:18px;width:46px;height:46px;font-size:25px}.photo-lightbox-nav{top:50%;transform:translateY(-50%);width:48px;height:48px;font-size:28px}.photo-lightbox-prev{left:16px}.photo-lightbox-next{right:16px}
 .photo-lightbox-title{position:absolute;left:20px;right:20px;bottom:22px;text-align:center;color:#fff;font:600 15px Arial,sans-serif}
-.album-image{cursor:zoom-in;position:relative;z-index:1}
-.album-caption{pointer-events:none;z-index:2}
-.album-item .album-image{touch-action:manipulation}
-.album-image-fullscreen{position:absolute;right:9px;bottom:9px;z-index:6;border:0;border-radius:999px;background:rgba(255,255,255,.94);width:38px;height:38px;display:grid;place-items:center;font:700 17px Arial,sans-serif;color:var(--ink);box-shadow:0 5px 18px rgba(0,0,0,.16);touch-action:manipulation}
+.album-image{cursor:zoom-in}
 .album-order{position:absolute;left:9px;bottom:9px;z-index:5;display:flex;gap:5px}
 .album-order button{width:31px;height:31px;border:0;border-radius:50%;background:rgba(255,255,255,.94);color:var(--ink);font:700 15px Arial,sans-serif}
 .album-title-modal .modal-card{width:min(460px,100%)}
@@ -709,57 +706,30 @@ function renderAlbum(){
   const type=p.media_type==='video'?'video':'image';
   const media=type==='video'
    ? `<video id="albumVideo${p.id}" src="${escapeHtml(p.image_url)}" controls playsinline preload="metadata"></video><button class="album-fullscreen" type="button" onclick="openVideoFullscreen('albumVideo${p.id}')" aria-label="Ver video en pantalla completa">⛶</button>`
-   : `<img class="album-image" data-album-photo="${p.id}" src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.title||'Fotografía')}" onclick="openPhotoUrl(decodeURIComponent('${encodeURIComponent(p.image_url)}'),decodeURIComponent('${encodeURIComponent(p.title||'Nuestro momento')}'),${p.id})"><button class="album-image-fullscreen" type="button" onclick="event.stopPropagation();openPhotoUrl(decodeURIComponent('${encodeURIComponent(p.image_url)}'),decodeURIComponent('${encodeURIComponent(p.title||'Nuestro momento')}'),${p.id})" aria-label="Abrir fotografía en pantalla completa">⛶</button>`;
+   : `<img class="album-image" src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.title||'Fotografía')}" onclick="openPhotoLightbox(${p.id})">`;
   const order=`<div class="album-order core-editor-only"><button type="button" onclick="moveAlbumItem(${p.id},-1)" aria-label="Mover antes" ${index===0?'disabled':''}>←</button><button type="button" onclick="moveAlbumItem(${p.id},1)" aria-label="Mover después" ${index===albumPhotos.length-1?'disabled':''}>→</button></div>`;
   return `<article class="album-item">${media}<div class="album-caption">${escapeHtml(p.title||'Nuestro momento')}</div>${order}<button class="album-edit core-editor-only" type="button" onclick="editAlbumTitle(${p.id})">Editar</button><button class="album-delete core-editor-only" type="button" onclick="deleteAlbumPhoto(${p.id})">Eliminar</button></article>`;
  }).join('');
 }
-document.getElementById('cloudAlbum')?.addEventListener('click',e=>{
- const img=e.target.closest('img[data-album-photo]');
- if(!img)return;
- openPhotoLightbox(img.dataset.albumPhoto);
-});
-document.getElementById('cloudAlbum')?.addEventListener('pointerup',e=>{
- const img=e.target.closest('img[data-album-photo]');
- if(!img||e.pointerType==='mouse')return;
- e.preventDefault();
- openPhotoLightbox(img.dataset.albumPhoto);
-});
 let activePhotoId=null;
-let activeEventPhotoId=null;
 function photoItems(){return albumPhotos.filter(p=>p.media_type!=='video')}
 function setPhotoLightboxNavigation(show){
  document.querySelectorAll('.photo-lightbox-nav').forEach(btn=>btn.style.display=show?'':'none');
 }
-function openPhotoUrl(url,title,id){
- if(!url)return;
- activePhotoId=id??null;activeEventPhotoId=null;
- const img=document.getElementById('photoLightboxImage'),label=document.getElementById('photoLightboxTitle'),box=document.getElementById('photoLightbox');
- if(!img||!label||!box)return;
- img.src=url;img.alt=title||'Fotografía';label.textContent=title||'Nuestro momento';
- setPhotoLightboxNavigation(photoItems().length>1);
- box.style.display='flex';box.classList.add('open');box.setAttribute('aria-hidden','false');
-}
 function openPhotoLightbox(id){
- const p=albumPhotos.find(x=>String(x.id)===String(id)&&x.media_type!=='video');if(!p)return;activePhotoId=id;activeEventPhotoId=null;setPhotoLightboxNavigation(true);
+ const p=albumPhotos.find(x=>x.id===id&&x.media_type!=='video');if(!p)return;activePhotoId=id;setPhotoLightboxNavigation(true);
  document.getElementById('photoLightboxImage').src=p.image_url;
  document.getElementById('photoLightboxImage').alt=p.title||'Fotografía';
  document.getElementById('photoLightboxTitle').textContent=p.title||'Nuestro momento';
  const box=document.getElementById('photoLightbox');box.classList.add('open');box.setAttribute('aria-hidden','false');
 }
-function eventPhotoItems(){return events.filter(e=>(e.image_url||e.image)&&e.media_type!=='video')}
 function openEventPhoto(id){
- const e=eventPhotoItems().find(x=>x.id===id);if(!e)return;
+ const e=events.find(x=>x.id===id&&x.media_type!=='video');if(!e)return;
  const img=document.getElementById('photoLightboxImage'),title=document.getElementById('photoLightboxTitle'),box=document.getElementById('photoLightbox');
- img.src=e.image_url||e.image||'';img.alt=e.title||'Recuerdo';title.textContent=(e.date?formatDate(e.date)+' · ':'')+(e.title||'Recuerdo');activePhotoId=null;activeEventPhotoId=id;setPhotoLightboxNavigation(eventPhotoItems().length>1);box.classList.add('open');box.setAttribute('aria-hidden','false');
+ img.src=e.image_url||e.image||'';img.alt=e.title||'Recuerdo';title.textContent=e.title||'Recuerdo';activePhotoId=null;setPhotoLightboxNavigation(false);box.classList.add('open');box.setAttribute('aria-hidden','false');
 }
-function closePhotoLightbox(){const box=document.getElementById('photoLightbox');box.classList.remove('open');box.style.display='none';box.setAttribute('aria-hidden','true');document.getElementById('photoLightboxImage').removeAttribute('src');activePhotoId=null;activeEventPhotoId=null}
-function stepPhoto(delta){
- if(activeEventPhotoId!==null){
-  const arr=eventPhotoItems();if(!arr.length)return;let i=arr.findIndex(x=>x.id===activeEventPhotoId);i=(i+delta+arr.length)%arr.length;openEventPhoto(arr[i].id);return;
- }
- const arr=photoItems();if(!arr.length)return;let i=arr.findIndex(x=>x.id===activePhotoId);i=(i+delta+arr.length)%arr.length;openPhotoLightbox(arr[i].id)
-}
+function closePhotoLightbox(){const box=document.getElementById('photoLightbox');box.classList.remove('open');box.setAttribute('aria-hidden','true');document.getElementById('photoLightboxImage').removeAttribute('src');activePhotoId=null}
+function stepPhoto(delta){const arr=photoItems();if(!arr.length)return;let i=arr.findIndex(x=>x.id===activePhotoId);i=(i+delta+arr.length)%arr.length;openPhotoLightbox(arr[i].id)}
 async function openVideoFullscreen(id){
  const source=document.getElementById(id),box=document.getElementById('videoLightbox'),player=document.getElementById('fullscreenVideo');
  if(!source||!box||!player)return;
