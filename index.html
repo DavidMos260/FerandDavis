@@ -230,6 +230,8 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
 .album-image{cursor:zoom-in;position:relative;z-index:1}
 .album-caption{pointer-events:none;z-index:2}
 .album-item .album-image{touch-action:manipulation}
+.album-photo-open{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;background:transparent;display:block;z-index:1}
+.album-photo-open img{width:100%;height:100%;object-fit:cover;display:block}
 .album-order{position:absolute;left:9px;bottom:9px;z-index:5;display:flex;gap:5px}
 .album-order button{width:31px;height:31px;border:0;border-radius:50%;background:rgba(255,255,255,.94);color:var(--ink);font:700 15px Arial,sans-serif}
 .album-title-modal .modal-card{width:min(460px,100%)}
@@ -708,7 +710,7 @@ function renderAlbum(){
   const type=p.media_type==='video'?'video':'image';
   const media=type==='video'
    ? `<video id="albumVideo${p.id}" src="${escapeHtml(p.image_url)}" controls playsinline preload="metadata"></video><button class="album-fullscreen" type="button" onclick="openVideoFullscreen('albumVideo${p.id}')" aria-label="Ver video en pantalla completa">⛶</button>`
-   : `<img class="album-image" src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.title||'Fotografía')}" onclick="openPhotoLightbox(${p.id})">`;
+   : `<button class="album-photo-open" type="button" onclick="openPhotoLightbox(${p.id})" aria-label="Abrir ${escapeHtml(p.title||'fotografía')} en pantalla completa"><img class="album-image" src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.title||'Fotografía')}"></button>`;
   const order=`<div class="album-order core-editor-only"><button type="button" onclick="moveAlbumItem(${p.id},-1)" aria-label="Mover antes" ${index===0?'disabled':''}>←</button><button type="button" onclick="moveAlbumItem(${p.id},1)" aria-label="Mover después" ${index===albumPhotos.length-1?'disabled':''}>→</button></div>`;
   return `<article class="album-item">${media}<div class="album-caption">${escapeHtml(p.title||'Nuestro momento')}</div>${order}<button class="album-edit core-editor-only" type="button" onclick="editAlbumTitle(${p.id})">Editar</button><button class="album-delete core-editor-only" type="button" onclick="deleteAlbumPhoto(${p.id})">Eliminar</button></article>`;
  }).join('');
