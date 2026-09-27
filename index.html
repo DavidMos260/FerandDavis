@@ -746,6 +746,7 @@ function showMediaItem(item,context){
   const img=document.getElementById('photoLightboxImage'),label=document.getElementById('photoLightboxTitle'),box=document.getElementById('photoLightbox');
   img.src=url;img.alt=item.title||'Fotografía';label.textContent=title;box.classList.add('open');box.setAttribute('aria-hidden','false');setPhotoLightboxNavigation(true);
  }
+ preloadAroundMedia();
 }
 function openAlbumMedia(id){const item=albumMediaItems().find(x=>String(x.id)===String(id));showMediaItem(item,'album')}
 function openEventMedia(id){const item=eventMediaItems().find(x=>String(x.id)===String(id));showMediaItem(item,'timeline')}
@@ -1230,7 +1231,18 @@ async function restoreFullBackup(file){
    const {error:delErr}=await supabaseClient.from(table).delete().neq('id',-999999999);if(delErr)throw new Error(table+': '+delErr.message);
    if(backup.tables[table].length){const {error}=await supabaseClient.from(table).insert(backup.tables[table]);if(error)throw new Error(table+': '+error.message)}
   }
-  showNotice('Datos restaurados. Ahora se restaurarán los archivos incluidos cuando sea necesario. Recarga la página al cerrar este aviso.');
+  let restoredFiles=0;
+  const restoreFile=async(row,folder,name,type,bucket,urlField)=>{
+   const url=row?.[urlField];if(!url)return;
+   const path=storagePathFromPublicUrl(url,bucket);if(!path)return;
+   const entry=zip.file('archivos/'+folder+'/'+backupSafeName(name)+backupExt(url,type));if(!entry)return;
+   const blob=await entry.async('blob');
+   const {error}=await supabaseClient.storage.from(bucket).upload(path,blob,{upsert:true,contentType:blob.type||undefined});
+   if(error)throw new Error('Archivo '+name+': '+error.message);restoredFiles++;
+  };
+  for(const e of backup.tables.events||[])await restoreFile(e,'linea-del-tiempo',String(e.date||'sin-fecha')+'_'+(e.title||e.id),e.media_type,'event-images','image_url');
+  for(const p of backup.tables.album_photos||[])await restoreFile(p,'album',String(p.sort_order??p.id)+'_'+(p.title||p.id),p.media_type,'event-images','image_url');
+  showNotice('Respaldo restaurado: datos y '+restoredFiles+' archivo(s) multimedia.');
   await initSupabase();
  }catch(err){console.error(err);showNotice('No se pudo restaurar el respaldo: '+(err?.message||'Error desconocido'))}
 }
