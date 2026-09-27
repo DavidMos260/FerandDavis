@@ -958,7 +958,7 @@ function previewEventImage(){
  setEventImagePreview(URL.createObjectURL(f));
 }
 async function saveEvent(){
- if(!isAdmin){showNotice('Inicia sesión como administrador.');return}
+ if(!canEditCore()){showNotice('Inicia sesión con una cuenta con permisos de edición.');return}
  const date=document.getElementById('eventDate').value;
  const title=document.getElementById('eventTitle').value.trim();
  const desc=document.getElementById('eventDesc').value.trim();
@@ -986,8 +986,9 @@ async function saveEvent(){
        if(error)throw error;
        events.push(normalizeEvent(data));
      }
-     closeEvent();renderEvents();return;
+     hideUploadProgress();closeEvent();renderEvents();return;
    }catch(err){
+     hideUploadProgress();
      console.error(err);
      showNotice('No se pudo guardar en Supabase. Revisa la configuración y las tablas.');
      return;
@@ -1026,8 +1027,8 @@ async function changeEventImage(id){
        if(oldImage&&oldImage!==image_url){try{await removeStoredFile(oldImage,'event-images')}catch(cleanErr){console.warn('No se pudo limpiar la imagen anterior',cleanErr)}}
        const idx=events.findIndex(x=>x.id===id);
        if(idx>=0)events[idx]=normalizeEvent(data,events[idx]);
-         renderEvents();
-     }catch(err){console.error(err);showNotice('No se pudo cambiar la imagen en Supabase.')}
+         hideUploadProgress();renderEvents();
+     }catch(err){hideUploadProgress();console.error(err);showNotice('No se pudo cambiar la imagen en Supabase.')}
    }else{
      e.image=URL.createObjectURL(file);persist();renderEvents();
    }
