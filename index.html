@@ -544,9 +544,9 @@ function showConfirm(message,{title='Confirmar',danger=false,confirmText='Contin
  document.getElementById('uiDialogOk').textContent=confirmText;modal.classList.toggle('ui-dialog-danger',danger);modal.classList.add('open');
  return new Promise(resolve=>{uiDialogResolve=resolve;document.getElementById('uiDialogCancel').onclick=()=>closeUiDialog(false);document.getElementById('uiDialogOk').onclick=()=>closeUiDialog(true)});
 }
-const revealObserver=('IntersectionObserver' in window)?new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-visible');revealObserver.unobserve(entry.target)}})},{threshold:.08,rootMargin:'0px 0px -25px'}):null;
+const legacyRevealObserver=('IntersectionObserver' in window)?new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-visible');legacyRevealObserver.unobserve(entry.target)}})},{threshold:.08,rootMargin:'0px 0px -25px'}):null;
 function prepareReveals(root=document){
- root.querySelectorAll('.event,.album-item,.todo,.secret,.letter').forEach((el,i)=>{if(el.dataset.revealReady)return;el.dataset.revealReady='1';el.classList.add('reveal-in');el.style.transitionDelay=Math.min(i,5)*45+'ms';if(revealObserver)revealObserver.observe(el);else el.classList.add('is-visible')});
+ root.querySelectorAll('.event,.album-item,.todo,.secret,.letter').forEach((el,i)=>{if(el.dataset.revealReady)return;el.dataset.revealReady='1';el.classList.add('reveal-in');el.style.transitionDelay=Math.min(i,5)*45+'ms';if(legacyRevealObserver)legacyRevealObserver.observe(el);else el.classList.add('is-visible')});
 }
 /* Supabase
    Proyecto conectado: DavidMos260's Project.
