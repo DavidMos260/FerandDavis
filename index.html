@@ -879,7 +879,7 @@ let todos=[];
 let coupleReasons=[];
 let editingReasonPosition=null;
 function persist(){}
-function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));if(id==='story')renderEvents();if(id==='album')loadAlbum();if(id==='todos')loadTodos();if(id==='letter')loadLetter();if(id==='secrets')renderSecrets();if(id==='reasons')loadReasons();requestAnimationFrame(()=>prepareReveals(document.getElementById(id)||document))}
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));if(id==='album')loadAlbum();if(id==='todos')loadTodos();if(id==='letter')loadLetter();if(id==='secrets')renderSecrets();if(id==='reasons')loadReasons();requestAnimationFrame(()=>prepareReveals(document.getElementById(id)||document))}
 async function loadTodos(){
  if(!supabaseClient)return;
  const {data,error}=await supabaseClient.from('couple_todos').select('*').order('sort_order',{ascending:true}).order('id',{ascending:true});
