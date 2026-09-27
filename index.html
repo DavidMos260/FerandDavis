@@ -281,6 +281,7 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
 
 .reasons-intro{max-width:700px;margin-bottom:20px}.reasons-progress{display:flex;align-items:center;gap:12px;margin:18px 0 24px}.reasons-progress-track{height:8px;flex:1;border-radius:99px;background:rgba(118,85,159,.1);overflow:hidden}.reasons-progress-fill{height:100%;width:100%;border-radius:inherit;background:var(--lilac-dark)}.reasons-count{font:700 11px Arial,sans-serif;color:var(--lilac-dark);white-space:nowrap}.reasons-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.reason-card{position:relative;padding:18px 18px 17px;min-height:125px}.reason-number{font:700 10px Arial,sans-serif;letter-spacing:.12em;color:var(--lilac-dark);text-transform:uppercase}.reason-card p{margin:11px 0 0;line-height:1.55}.reason-edit{position:absolute;right:9px;top:9px;border:1px solid var(--line);background:rgba(255,255,255,.9);border-radius:50%;width:32px;height:32px;color:var(--lilac-dark)}.reason-modal .modal-card{width:min(520px,100%)}.reason-modal textarea{min-height:130px;font-size:16px}.reasons-jump{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}.reasons-jump button{border:1px solid var(--line);background:#fff;border-radius:99px;padding:8px 11px;font:700 10px Arial,sans-serif;color:var(--muted)}@media(max-width:650px){.reasons-grid{grid-template-columns:1fr}.reason-card{min-height:auto}}
 .modal:not(.open),.upload-overlay:not(.show),.photo-lightbox:not(.open),.video-lightbox:not(.open){pointer-events:none!important}
+body.is-editor .admin-full-only{display:none!important}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
 </head>
@@ -479,8 +480,8 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
     <button class="admin-shortcut" type="button" onclick="adminGo('story')"><span>♡</span><b>Historia</b><small>Recuerdos</small></button>
     <button class="admin-shortcut" type="button" onclick="adminGo('album')"><span>▧</span><b>Álbum</b><small>Fotos y videos</small></button>
     <button class="admin-shortcut" type="button" onclick="adminGo('todos')"><span>✓</span><b>Lista</b><small>Planes juntos</small></button>
-    <button class="admin-shortcut" type="button" onclick="adminGo('letter')"><span>✉</span><b>Carta</b><small>Editar carta</small></button>
-  <button class="admin-shortcut" type="button" onclick="adminGo('reasons')"><span>♥</span><b>100 razones</b><small>Editar razones</small></button>
+    <button class="admin-shortcut admin-full-only" type="button" onclick="adminGo('letter')"><span>✉</span><b>Carta</b><small>Editar carta</small></button>
+  <button class="admin-shortcut admin-full-only" type="button" onclick="adminGo('reasons')"><span>♥</span><b>100 razones</b><small>Editar razones</small></button>
    </div>
    <button class="btn ghost small admin-logout" type="button" onclick="adminLogout()">Cerrar sesión</button>
   </div>
