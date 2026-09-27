@@ -227,7 +227,9 @@ button:active,.btn:active,.back:active{transform:scale(.97)}
 .photo-lightbox-close,.photo-lightbox-nav{position:absolute;border:0;border-radius:50%;background:rgba(255,255,255,.92);color:#2c2432;display:grid;place-items:center;box-shadow:0 8px 25px rgba(0,0,0,.18)}
 .photo-lightbox-close{right:18px;top:18px;width:46px;height:46px;font-size:25px}.photo-lightbox-nav{top:50%;transform:translateY(-50%);width:48px;height:48px;font-size:28px}.photo-lightbox-prev{left:16px}.photo-lightbox-next{right:16px}
 .photo-lightbox-title{position:absolute;left:20px;right:20px;bottom:22px;text-align:center;color:#fff;font:600 15px Arial,sans-serif}
-.album-image{cursor:zoom-in}
+.album-image{cursor:zoom-in;position:relative;z-index:1}
+.album-caption{pointer-events:none;z-index:2}
+.album-item .album-image{touch-action:manipulation}
 .album-order{position:absolute;left:9px;bottom:9px;z-index:5;display:flex;gap:5px}
 .album-order button{width:31px;height:31px;border:0;border-radius:50%;background:rgba(255,255,255,.94);color:var(--ink);font:700 15px Arial,sans-serif}
 .album-title-modal .modal-card{width:min(460px,100%)}
