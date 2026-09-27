@@ -353,6 +353,14 @@ body.is-admin #album .album-admin-menu.open,
 body.is-editor #album .album-admin-menu.open{display:flex!important;flex-direction:column!important;align-items:stretch!important}
 #album .album-admin-menu button{display:block!important;width:100%!important;flex:0 0 auto!important}
 
+
+.section-nav{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 0 22px;padding:5px;background:rgba(255,255,255,.72);border:1px solid var(--line);border-radius:999px;position:sticky;top:4px;z-index:16;backdrop-filter:blur(12px)}.section-nav::-webkit-scrollbar{display:none}.section-nav button{flex:0 0 auto;border:0;background:transparent;color:var(--muted);border-radius:999px;padding:9px 11px;font:600 11px Arial,sans-serif}.section-nav button:active{background:var(--lilac-soft);color:var(--lilac-dark)}
+.todo-progress-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:6px 2px 10px}.todo-progress-head strong{display:block;font:700 17px Georgia,serif}.todo-progress-head small{display:block;color:var(--muted);font:11px Arial,sans-serif;margin-top:4px}.todo-progress-head>span{font:700 22px Georgia,serif;color:var(--lilac-dark)}.todo-group-title{margin:20px 2px 8px;font:700 11px Arial,sans-serif;text-transform:uppercase;letter-spacing:.12em;color:var(--lilac-dark)}.todo-group-title.completed{color:var(--muted)}.todo{transition:transform .25s ease,opacity .25s ease}.todo.done{opacity:.72}
+.reason-today{margin:18px 0 20px;padding:22px 24px;border-radius:22px;background:linear-gradient(135deg,var(--lilac-soft),#fff);border:1px solid var(--line);text-align:center}.reason-today span{font:700 10px Arial,sans-serif;text-transform:uppercase;letter-spacing:.16em;color:var(--lilac-dark)}.reason-today p{margin:10px 0 0;font:italic 20px Georgia,serif;line-height:1.45;color:var(--ink)}
+#letter .letter{max-width:680px;background:linear-gradient(180deg,#fff,#fdfaff);border:1px solid rgba(118,85,159,.18);box-shadow:0 20px 60px rgba(54,38,65,.09)}#letter .letter textarea{line-height:1.8}.letter-updated{text-align:right;margin-top:12px;color:var(--muted);font:italic 11px Georgia,serif}
+.admin-group-title{margin:15px 2px -7px;font:700 10px Arial,sans-serif;text-transform:uppercase;letter-spacing:.14em;color:var(--lilac-dark)}.admin-system-shortcuts{margin-top:14px}
+@media(max-width:650px){.section-nav{margin-bottom:18px}.section-nav button{padding:8px 10px}.reason-today p{font-size:18px}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -472,12 +480,12 @@ body.is-editor #album .album-admin-menu.open{display:flex!important;flex-directi
 
 <section class="screen" id="todos">
  <div class="screen-inner">
-  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
+  <div class="topbar"><div class="brand">FER &amp; DAVIS</div>
+  <div class="section-nav"><button onclick="go('story')">♡ Historia</button><button onclick="go('album')">▧ Álbum</button><button onclick="go('todos')">✓ Lista</button><button onclick="go('reasons')">♥ Razones</button><button onclick="go('letter')">✉ Carta</button></div><button class="back" onclick="go('story')">← Historia</button></div>
   <div class="section-head"><div><h2>Nuestra lista</h2><p class="subtitle">Cosas que todavía nos faltan vivir juntos.</p></div></div>
   <div class="card" style="padding:18px">
    <div class="add-row core-editor-only"><input id="todoInput" placeholder="Agregar algo que quieran hacer juntos..."><button class="btn lilac" onclick="addTodo()">＋</button></div>
-   <div class="progress-wrap"><div class="progress" id="progress"></div></div>
-   <div id="todoCount" class="music-note"></div>
+   <div class="todo-progress-head"><div><strong id="todoCount">0 de 0 planes vividos</strong><small>Seguimos sumando momentos juntos</small></div><span id="todoPercent">0%</span></div><div class="progress-wrap"><div class="progress" id="progress"></div></div>
    <div id="todosList" class="list"></div>
   </div>
   <div class="footer-note">La lista está sincronizada en la nube.</div>
@@ -486,7 +494,8 @@ body.is-editor #album .album-admin-menu.open{display:flex!important;flex-directi
 
 <section class="screen" id="album">
  <div class="screen-inner">
-  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
+  <div class="topbar"><div class="brand">FER &amp; DAVIS</div>
+  <div class="section-nav"><button onclick="go('story')">♡ Historia</button><button onclick="go('album')">▧ Álbum</button><button onclick="go('todos')">✓ Lista</button><button onclick="go('reasons')">♥ Razones</button><button onclick="go('letter')">✉ Carta</button></div><button class="back" onclick="go('story')">← Historia</button></div>
   <div class="section-head"><div><div class="eyebrow">Nuestros momentos</div><h2>Álbum</h2><p class="subtitle">Fotos y videos de nuestros momentos juntos.</p></div><button class="btn lilac core-editor-only" onclick="addAlbumMedia()">＋ Agregar foto o video</button></div>
   <div class="album" id="cloudAlbum"><div class="album-empty card">Cargando álbum…</div></div>
   <div class="footer-note">Las fotos y videos se guardan en la nube y están disponibles en todos los dispositivos.</div>
@@ -496,19 +505,21 @@ body.is-editor #album .album-admin-menu.open{display:flex!important;flex-directi
 
 <section class="screen" id="reasons">
  <div class="screen-inner">
-  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
+  <div class="topbar"><div class="brand">FER &amp; DAVIS</div>
+  <div class="section-nav"><button onclick="go('story')">♡ Historia</button><button onclick="go('album')">▧ Álbum</button><button onclick="go('todos')">✓ Lista</button><button onclick="go('reasons')">♥ Razones</button><button onclick="go('letter')">✉ Carta</button></div><button class="back" onclick="go('story')">← Historia</button></div>
   <h2>100 razones para estar contigo</h2>
   <p class="subtitle reasons-intro">Un espacio para ir escribiendo, poco a poco, cada una de mis razones.</p>
   <div class="reasons-progress"><div class="reasons-progress-track"><div class="reasons-progress-fill" id="reasonsProgressFill"></div></div><div class="reasons-count" id="reasonsCount">0 de 100 ♥</div></div>
 
-  <div class="reasons-grid" id="reasonsGrid"><div class="card reason-card">Cargando razones…</div></div>
+  <div id="reasonToday"></div><div class="reasons-grid" id="reasonsGrid"><div class="card reason-card">Cargando razones…</div></div>
   <div class="actions"><button class="btn ghost" onclick="go('story')">← Volver a nuestra historia</button><button class="btn lilac" onclick="go('letter')">Carta →</button></div>
  </div>
 </section>
 
 <section class="screen" id="letter">
  <div class="screen-inner">
-  <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('story')">← Historia</button></div>
+  <div class="topbar"><div class="brand">FER &amp; DAVIS</div>
+  <div class="section-nav"><button onclick="go('story')">♡ Historia</button><button onclick="go('album')">▧ Álbum</button><button onclick="go('todos')">✓ Lista</button><button onclick="go('reasons')">♥ Razones</button><button onclick="go('letter')">✉ Carta</button></div><button class="back" onclick="go('story')">← Historia</button></div>
   <div class="card letter">
    <div class="eyebrow">El final... por ahora</div>
    <h2>Fer, tengo algo que decirte.</h2>
@@ -518,7 +529,7 @@ body.is-editor #album .album-admin-menu.open{display:flex!important;flex-directi
     <button class="btn lilac" onclick="saveLetter()">Guardar carta</button>
     <button class="btn ghost" onclick="clearLetter()">Borrar</button>
    </div>
-   <div id="letterStatus" class="status"></div>
+   <div id="letterStatus" class="status"></div><div id="letterUpdated" class="letter-updated"></div>
    <p style="font-style:italic;margin-top:24px">“Y esta página termina aquí... pero nuestra historia no.”</p>
    <div style="text-align:center;font-size:28px;color:var(--lilac-dark)">♥</div>
   </div>
@@ -538,13 +549,13 @@ body.is-editor #album .album-admin-menu.open{display:flex!important;flex-directi
   <div id="adminLoggedIn" style="display:none">
    <div class="admin-head"><div><div class="eyebrow">Centro de control</div><h3>Modo administrador</h3></div><span class="admin-dot" title="Sesión activa"></span></div>
    <p id="adminUserLabel">Sesión iniciada.</p>
-   <div class="admin-shortcuts">
+   <div class="admin-group-title">Contenido</div><div class="admin-shortcuts">
     <button class="admin-shortcut" type="button" onclick="adminGo('story')"><span>♡</span><b>Línea del tiempo</b><small>Nuestra historia</small></button>
     <button class="admin-shortcut" type="button" onclick="adminGo('album')"><span>▧</span><b>Álbum</b><small>Fotos y videos</small></button>
     <button class="admin-shortcut" type="button" onclick="adminGo('todos')"><span>✓</span><b>Lista</b><small>Planes juntos</small></button>
     <button class="admin-shortcut admin-full-only" type="button" onclick="adminGo('letter')"><span>✉</span><b>Carta</b><small>Editar carta</small></button>
   <button class="admin-shortcut admin-full-only" type="button" onclick="adminGo('reasons')"><span>♥</span><b>100 razones</b><small>Editar razones</small></button>
-  <button class="admin-shortcut admin-full-only" type="button" onclick="downloadFullBackup(event)"><span>⇩</span><b>Respaldo</b><small>Datos + archivos</small></button>
+  </div><div class="admin-group-title admin-full-only">Sistema y seguridad</div><div class="admin-shortcuts admin-system-shortcuts"><button class="admin-shortcut admin-full-only" type="button" onclick="downloadFullBackup(event)"><span>⇩</span><b>Respaldo</b><small>Datos + archivos</small></button>
 <button class="admin-shortcut admin-full-only" type="button" onclick="document.getElementById('restoreBackupInput').click()"><span>↥</span><b>Restaurar</b><small>Desde respaldo ZIP</small></button>
 <input class="backup-restore-input" id="restoreBackupInput" type="file" accept=".zip,application/zip" onchange="restoreFullBackup(this.files[0]);this.value=''">
    </div>
@@ -1221,8 +1232,10 @@ function renderTodos(){
  const progress=document.getElementById('progress');if(!progress)return;
  let done=todos.filter(x=>x.done).length,total=todos.length;
  progress.style.width=(total?done/total*100:0)+'%';
- document.getElementById('todoCount').textContent=`${done} de ${total} completadas`;
- const list=document.getElementById('todosList');list.innerHTML=todos.map(t=>`<label class="todo card ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} ${canEditCore()?'':'disabled'} onchange="toggleTodo(${t.id})"><span>${escapeHtml(t.text)}</span><button class="btn ghost small core-editor-only" type="button" onclick="deleteTodo(${t.id})">×</button></label>`).join('');prepareReveals(list);
+ document.getElementById('todoCount').textContent=`${done} de ${total} planes vividos`;const pct=total?Math.round(done/total*100):0;const pe=document.getElementById('todoPercent');if(pe)pe.textContent=pct+'%';
+ const list=document.getElementById('todosList'),pending=todos.filter(t=>!t.done),completed=todos.filter(t=>t.done);
+ const row=t=>`<label class="todo card ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} ${canEditCore()?'':'disabled'} onchange="toggleTodo(${t.id})"><span>${escapeHtml(t.text)}</span><button class="btn ghost small core-editor-only" type="button" onclick="deleteTodo(${t.id})">×</button></label>`;
+ list.innerHTML=(pending.length?'<div class="todo-group-title">Por vivir · '+pending.length+'</div>'+pending.map(row).join(''):'')+(completed.length?'<div class="todo-group-title completed">Ya vivimos · '+completed.length+'</div>'+completed.map(row).join(''):'');prepareReveals(list);
 }
 async function addTodo(){if(!canEditCore())return;let v=document.getElementById('todoInput').value.trim();if(!v)return;const {data,error}=await supabaseClient.from('couple_todos').insert({text:v,done:false,sort_order:todos.length}).select().single();if(error){showNotice('No se pudo agregar.');return}todos.push(data);document.getElementById('todoInput').value='';renderTodos()}
 async function toggleTodo(id){if(!canEditCore())return;let t=todos.find(x=>x.id===id);if(!t)return;const {data,error}=await supabaseClient.from('couple_todos').update({done:!t.done}).eq('id',id).select().single();if(error)return;Object.assign(t,data);renderTodos()}
@@ -1240,7 +1253,7 @@ function renderReasons(){
  const written=coupleReasons.filter(r=>(r.reason||'').trim());
  const count=document.getElementById('reasonsCount'),fill=document.getElementById('reasonsProgressFill');
  if(count)count.textContent=written.length+' de 100 ♥';
- if(fill)fill.style.width=written.length+'%';
+ if(fill)fill.style.width=written.length+'%';const today=document.getElementById('reasonToday');if(today){if(written.length){const seed=Math.floor(Date.now()/86400000)%written.length,r=written[seed];today.innerHTML='<div class="reason-today"><span>Una razón para hoy</span><p>'+escapeHtml(r.reason)+'</p></div>'}else today.innerHTML='';}
  if(!written.length){
   el.innerHTML=isAdmin?'<div class="card reason-card"><p>Todavía no has escrito ninguna razón. Puedes comenzar desde el modo administrador.</p><button class="btn lilac" type="button" onclick="editNextReason()">＋ Escribir primera razón</button></div>':'';
   return;
