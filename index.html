@@ -361,8 +361,37 @@ body.is-editor #album .album-admin-menu.open{display:flex!important;flex-directi
 .admin-group-title{margin:15px 2px -7px;font:700 10px Arial,sans-serif;text-transform:uppercase;letter-spacing:.14em;color:var(--lilac-dark)}.admin-system-shortcuts{margin-top:14px}
 @media(max-width:650px){.section-nav{margin-bottom:18px}.section-nav button{padding:8px 10px}.reason-today p{font-size:18px}}
 
+
+/* Media viewer: keep navigation, captions and video controls in separate zones */
+.video-lightbox,.photo-lightbox{background:#100d14!important}
+.video-lightbox video{width:100%;height:calc(100dvh - 156px);max-height:calc(100dvh - 156px);object-fit:contain;align-self:flex-start;margin-top:52px}
+.video-lightbox-close,.photo-lightbox-close{top:max(12px,env(safe-area-inset-top));right:16px;z-index:15}
+.video-lightbox-nav,.photo-lightbox-nav{position:absolute!important;top:50%!important;bottom:auto!important;transform:translateY(-50%)!important;width:42px;height:42px;z-index:12;background:rgba(255,255,255,.7)}
+.video-lightbox-prev,.photo-lightbox-prev{left:10px}.video-lightbox-next,.photo-lightbox-next{right:10px}
+.video-lightbox-title{display:none!important}
+.viewer-video-controls{position:absolute;bottom:0;left:0;right:0;z-index:13;background:linear-gradient(transparent,rgba(0,0,0,.96) 25%);padding:18px 18px max(16px,env(safe-area-inset-bottom));color:white;font:12px Arial,sans-serif}
+.viewer-video-heading{font:600 13px/1.4 Arial,sans-serif;overflow-wrap:anywhere;max-height:3em;overflow:hidden;margin-bottom:12px;padding-right:12px}
+#viewerSeek{display:block;width:100%;margin:0 0 9px;accent-color:#bda1dc;height:16px}
+.viewer-video-tools{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.viewer-video-tools>div{display:flex;align-items:center;gap:10px}
+.viewer-video-tools button{background:transparent;border:0;color:white;min-width:35px;min-height:35px;font-size:20px}
+.viewer-play{position:absolute;z-index:11;top:45%;left:50%;transform:translate(-50%,-50%);border:0;border-radius:50%;width:58px;height:58px;background:rgba(255,255,255,.82);color:#241d2a;font-size:24px;display:none}
+.video-lightbox.paused .viewer-play{display:block}
+.photo-lightbox{padding:58px 12px 105px!important}
+.photo-lightbox img{max-height:calc(100dvh - 170px)!important}
+.photo-lightbox-title{bottom:max(22px,env(safe-area-inset-bottom))!important;left:18px!important;right:18px!important;max-height:3em;overflow:hidden;line-height:1.45;overflow-wrap:anywhere;padding:12px 6px;background:linear-gradient(transparent,rgba(0,0,0,.45))}
+
 </style>
-<script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js">
+function viewerTime(s){if(!Number.isFinite(s))return '0:00';return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')}
+function updateViewerControls(){const v=document.getElementById('fullscreenVideo'),box=document.getElementById('videoLightbox');if(!v||!box)return;box.classList.toggle('paused',v.paused);document.getElementById('viewerClock').textContent=viewerTime(v.currentTime)+' / '+viewerTime(v.duration);document.getElementById('viewerSeek').value=v.duration?Math.round(v.currentTime/v.duration*1000):0;document.getElementById('viewerPlaySmall').textContent=v.paused?'▶':'❚❚';document.getElementById('viewerMute').textContent=v.muted?'🔇':'🔊';document.getElementById('viewerVideoHeading').textContent=document.getElementById('videoLightboxTitle')?.textContent||''}
+function toggleViewerPlayback(){const v=document.getElementById('fullscreenVideo');if(v.paused)v.play().catch(console.warn);else v.pause();updateViewerControls()}
+function seekViewerVideo(value){const v=document.getElementById('fullscreenVideo');if(Number.isFinite(v.duration))v.currentTime=v.duration*Number(value)/1000}
+function toggleViewerMute(){const v=document.getElementById('fullscreenVideo');v.muted=!v.muted;updateViewerControls()}
+function viewerFullscreen(){const v=document.getElementById('fullscreenVideo');if(v.requestFullscreen)v.requestFullscreen().catch(console.warn);else if(v.webkitEnterFullscreen)v.webkitEnterFullscreen()}
+['timeupdate','loadedmetadata','play','pause','volumechange','ended'].forEach(e=>document.getElementById('fullscreenVideo')?.addEventListener(e,updateViewerControls));
+
+</script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
 <body>
@@ -377,7 +406,7 @@ body.is-editor #album .album-admin-menu.open{display:flex!important;flex-directi
   <div class="upload-file" id="uploadFile"></div>
  </div>
 </div>
-<div id="videoLightbox" class="video-lightbox" aria-hidden="true"><button class="video-lightbox-close" type="button" onclick="closeMediaViewer()" aria-label="Cerrar video">×</button><button class="video-lightbox-nav video-lightbox-prev" type="button" onclick="stepMedia(-1)" aria-label="Elemento anterior">‹</button><video id="fullscreenVideo" controls playsinline></video><button class="video-lightbox-nav video-lightbox-next" type="button" onclick="stepMedia(1)" aria-label="Elemento siguiente">›</button><div class="video-lightbox-title" id="videoLightboxTitle"></div></div>
+<div id="videoLightbox" class="video-lightbox" aria-hidden="true"><button class="video-lightbox-close" type="button" onclick="closeMediaViewer()" aria-label="Cerrar video">×</button><button class="video-lightbox-nav video-lightbox-prev" type="button" onclick="stepMedia(-1)" aria-label="Elemento anterior">‹</button><video id="fullscreenVideo" playsinline></video><button id="viewerPlay" class="viewer-play" type="button" onclick="toggleViewerPlayback()" aria-label="Reproducir o pausar">▶</button><div class="viewer-video-controls"><div class="viewer-video-heading" id="viewerVideoHeading"></div><input id="viewerSeek" type="range" min="0" max="1000" value="0" aria-label="Posición del video" oninput="seekViewerVideo(this.value)"><div class="viewer-video-tools"><span id="viewerClock">0:00 / 0:00</span><div><button type="button" onclick="toggleViewerPlayback()" id="viewerPlaySmall" aria-label="Reproducir o pausar">❚❚</button><button type="button" onclick="toggleViewerMute()" id="viewerMute" aria-label="Activar o desactivar sonido">🔊</button><button type="button" onclick="viewerFullscreen()" aria-label="Pantalla completa">⛶</button></div></div></div><button class="video-lightbox-nav video-lightbox-next" type="button" onclick="stepMedia(1)" aria-label="Elemento siguiente">›</button><div class="video-lightbox-title" id="videoLightboxTitle"></div></div>
 <div id="photoLightbox" class="photo-lightbox" aria-hidden="true">
  <button class="photo-lightbox-close" type="button" onclick="closePhotoLightbox()" aria-label="Cerrar fotografía">×</button>
  <button class="photo-lightbox-nav photo-lightbox-prev" type="button" onclick="stepPhoto(-1)" aria-label="Fotografía anterior">‹</button>
