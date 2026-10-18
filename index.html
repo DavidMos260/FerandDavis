@@ -1145,7 +1145,7 @@ async function saveEvent(){
  if(window.supabaseClient){
    try{
      let image_url=null,media_type=null;
-     if(file){const ext=(file.name.split('.').pop()||'').toLowerCase();media_type=(file.type.startsWith('video/')||['mp4','mov','m4v','webm','avi'].includes(ext))?'video':'image';if(media_type==='video'&&file.size>50*1024*1024)throw new Error('El video supera el límite de 50 MB.');image_url=await uploadEventImage(file)}
+     if(file){const ext=(file.name.split('.').pop()||'').toLowerCase();media_type=(file.type.startsWith('video/')||['mp4','mov','m4v','webm','avi'].includes(ext))?'video':'image';if(media_type==='video'&&file.size>50*1024*1024)throw new Error('Este video pesa '+(file.size/1048576).toFixed(1)+' MB. Supabase Free permite como máximo 50 MB por archivo. Comprime el video antes de subirlo.');image_url=await uploadEventImage(file)}
      if(id){
        const previous=events.find(x=>x.id===id);const oldImage=previous?.image_url||previous?.image||'';
        const payload={date,title,description:desc};
@@ -1166,7 +1166,7 @@ async function saveEvent(){
    }catch(err){
      hideUploadProgress();
      console.error(err);
-     showNotice('No se pudo guardar en Supabase. Revisa la configuración y las tablas.');
+     showNotice(err?.message?.includes('Supabase Free')?err.message:'No se pudo guardar el recuerdo. '+(err?.message||'Comprueba tu conexión e inténtalo de nuevo.'));
      return;
    }
  }
@@ -1196,7 +1196,7 @@ async function changeEventImage(id){
    if(!file)return;
    if(window.supabaseClient){
      try{
-       const oldImage=e.image_url||e.image||'';const ext=(file.name.split('.').pop()||'').toLowerCase();const media_type=(file.type.startsWith('video/')||['mp4','mov','m4v','webm','avi'].includes(ext))?'video':'image';if(media_type==='video'&&file.size>50*1024*1024)throw new Error('El video supera el límite de 50 MB.');
+       const oldImage=e.image_url||e.image||'';const ext=(file.name.split('.').pop()||'').toLowerCase();const media_type=(file.type.startsWith('video/')||['mp4','mov','m4v','webm','avi'].includes(ext))?'video':'image';if(media_type==='video'&&file.size>50*1024*1024)throw new Error('Este video pesa '+(file.size/1048576).toFixed(1)+' MB. Supabase Free permite como máximo 50 MB por archivo. Comprime el video antes de subirlo.');
        const image_url=await uploadEventImage(file);
        const {data,error}=await window.supabaseClient.from('events').update({image_url,media_type}).eq('id',id).select().single();
        if(error)throw error;
