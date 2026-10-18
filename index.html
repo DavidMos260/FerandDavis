@@ -381,6 +381,14 @@ body.is-editor #album .album-admin-menu.open{display:flex!important;flex-directi
 .photo-lightbox img{max-height:calc(100dvh - 170px)!important}
 .photo-lightbox-title{bottom:max(22px,env(safe-area-inset-bottom))!important;left:18px!important;right:18px!important;max-height:3em;overflow:hidden;line-height:1.45;overflow-wrap:anywhere;padding:12px 6px;background:linear-gradient(transparent,rgba(0,0,0,.45))}
 
+
+/* Reliable native video controls on Android; avoid duplicate custom overlay */
+#videoLightbox .viewer-play,#videoLightbox .viewer-video-controls{display:none!important}
+#videoLightbox video{height:calc(100dvh - 112px)!important;max-height:calc(100dvh - 112px)!important;margin-top:48px!important;align-self:center!important;position:relative;z-index:2}
+#videoLightbox .video-lightbox-nav{z-index:5;pointer-events:auto}
+#videoLightbox .video-lightbox-close{z-index:6}
+#videoLightbox .video-lightbox-title{display:block!important;position:absolute;top:max(12px,env(safe-area-inset-top));bottom:auto;left:16px;right:75px;text-align:left;font:600 12px/1.4 Arial,sans-serif;max-height:3em;overflow:hidden;pointer-events:none;z-index:4}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js">
 function viewerTime(s){if(!Number.isFinite(s))return '0:00';return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')}
@@ -406,7 +414,7 @@ function viewerFullscreen(){const v=document.getElementById('fullscreenVideo');i
   <div class="upload-file" id="uploadFile"></div>
  </div>
 </div>
-<div id="videoLightbox" class="video-lightbox" aria-hidden="true"><button class="video-lightbox-close" type="button" onclick="closeMediaViewer()" aria-label="Cerrar video">×</button><button class="video-lightbox-nav video-lightbox-prev" type="button" onclick="stepMedia(-1)" aria-label="Elemento anterior">‹</button><video id="fullscreenVideo" playsinline></video><button id="viewerPlay" class="viewer-play" type="button" onclick="toggleViewerPlayback()" aria-label="Reproducir o pausar">▶</button><div class="viewer-video-controls"><div class="viewer-video-heading" id="viewerVideoHeading"></div><input id="viewerSeek" type="range" min="0" max="1000" value="0" aria-label="Posición del video" oninput="seekViewerVideo(this.value)"><div class="viewer-video-tools"><span id="viewerClock">0:00 / 0:00</span><div><button type="button" onclick="toggleViewerPlayback()" id="viewerPlaySmall" aria-label="Reproducir o pausar">❚❚</button><button type="button" onclick="toggleViewerMute()" id="viewerMute" aria-label="Activar o desactivar sonido">🔊</button><button type="button" onclick="viewerFullscreen()" aria-label="Pantalla completa">⛶</button></div></div></div><button class="video-lightbox-nav video-lightbox-next" type="button" onclick="stepMedia(1)" aria-label="Elemento siguiente">›</button><div class="video-lightbox-title" id="videoLightboxTitle"></div></div>
+<div id="videoLightbox" class="video-lightbox" aria-hidden="true"><button class="video-lightbox-close" type="button" onclick="closeMediaViewer()" aria-label="Cerrar video">×</button><button class="video-lightbox-nav video-lightbox-prev" type="button" onclick="stepMedia(-1)" aria-label="Elemento anterior">‹</button><video id="fullscreenVideo" controls playsinline preload="metadata"></video><button id="viewerPlay" class="viewer-play" type="button" onclick="toggleViewerPlayback()" aria-label="Reproducir o pausar">▶</button><div class="viewer-video-controls"><div class="viewer-video-heading" id="viewerVideoHeading"></div><input id="viewerSeek" type="range" min="0" max="1000" value="0" aria-label="Posición del video" oninput="seekViewerVideo(this.value)"><div class="viewer-video-tools"><span id="viewerClock">0:00 / 0:00</span><div><button type="button" onclick="toggleViewerPlayback()" id="viewerPlaySmall" aria-label="Reproducir o pausar">❚❚</button><button type="button" onclick="toggleViewerMute()" id="viewerMute" aria-label="Activar o desactivar sonido">🔊</button><button type="button" onclick="viewerFullscreen()" aria-label="Pantalla completa">⛶</button></div></div></div><button class="video-lightbox-nav video-lightbox-next" type="button" onclick="stepMedia(1)" aria-label="Elemento siguiente">›</button><div class="video-lightbox-title" id="videoLightboxTitle"></div></div>
 <div id="photoLightbox" class="photo-lightbox" aria-hidden="true">
  <button class="photo-lightbox-close" type="button" onclick="closePhotoLightbox()" aria-label="Cerrar fotografía">×</button>
  <button class="photo-lightbox-nav photo-lightbox-prev" type="button" onclick="stepPhoto(-1)" aria-label="Fotografía anterior">‹</button>
