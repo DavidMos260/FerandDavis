@@ -395,6 +395,12 @@ body.is-editor #album .album-admin-menu.open{display:flex!important;flex-directi
 @media(max-width:550px){.birthday-gifts{grid-template-columns:repeat(2,minmax(0,1fr))}.birthday-card{margin-top:14px}}
 
 .birthday-viewer{position:fixed;inset:0;z-index:99999;background:rgba(12,8,18,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;color:#fff}.birthday-viewer[hidden]{display:none}.birthday-viewer-close{position:absolute;top:calc(env(safe-area-inset-top,0px) + 16px);right:16px;border:0;border-radius:50%;width:46px;height:46px;background:#fff;color:#2d2136;font-size:28px;z-index:2}.birthday-viewer-image-wrap{width:100%;height:min(68dvh,760px);display:flex;align-items:center;justify-content:center}.birthday-viewer-image{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;border-radius:10px}.birthday-viewer-placeholder{font-size:76px}.birthday-viewer-caption{width:min(100%,620px);max-height:25dvh;overflow:auto;text-align:center;padding:14px 12px 8px;box-sizing:border-box}.birthday-viewer-caption h3{margin:0 0 8px;font-size:25px}.birthday-viewer-caption p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:17px;line-height:1.5;color:#f0e5f6}.birthday-viewer-nav{display:flex;gap:22px;align-items:center;justify-content:center;margin-top:10px}.birthday-viewer-nav button{border:1px solid #ffffff55;border-radius:50%;width:46px;height:46px;background:#ffffff20;color:white;font-size:26px}.birthday-viewer-nav button:disabled{opacity:.25}@media(max-width:550px){.birthday-viewer{padding:12px}.birthday-viewer-image-wrap{height:65dvh}.birthday-viewer-caption{max-height:23dvh}.birthday-viewer-caption h3{font-size:22px}.birthday-viewer-caption p{font-size:16px}}
+
+/* Birthday fullscreen viewer: never fall back to the old inline detail card */
+.birthday-gift-detail{display:none!important}
+#birthdayViewer{position:fixed!important;inset:0!important;z-index:2147483000!important}
+#birthdayViewer[hidden]{display:none!important}
+#birthdayViewer:not([hidden]){display:flex!important}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js">
 function viewerTime(s){if(!Number.isFinite(s))return '0:00';return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')}
