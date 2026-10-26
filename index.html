@@ -389,6 +389,11 @@ body.is-editor #album .album-admin-menu.open{display:flex!important;flex-directi
 #videoLightbox .video-lightbox-close{z-index:6}
 #videoLightbox .video-lightbox-title{display:block!important;position:absolute;top:max(12px,env(safe-area-inset-top));bottom:auto;left:16px;right:75px;text-align:left;font:600 12px/1.4 Arial,sans-serif;max-height:3em;overflow:hidden;pointer-events:none;z-index:4}
 
+
+.birthday-home-link{border:1px solid rgba(255,255,255,.55);border-radius:999px;padding:12px 17px;background:rgba(28,15,35,.5);color:#fff;margin-top:12px;backdrop-filter:blur(8px)}
+.birthday-page{width:min(780px,92vw)}.birthday-card{margin:24px auto;width:100%;text-align:center;background:linear-gradient(140deg,#30223f,#60416f);border-radius:26px;padding:clamp(22px,5vw,42px);color:#fff;box-shadow:0 20px 65px #33244233}.birthday-card h2{color:#fff;margin:15px 0}.birthday-card p{color:#ead9f2}.birthday-card .eyebrow{color:#dfc1ed}.birthday-countdown{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:24px 0}.birthday-countdown>div{background:#ffffff19;border:1px solid #ffffff30;border-radius:14px;padding:14px 4px}.birthday-countdown strong{display:block;font:700 clamp(22px,6vw,36px) Georgia,serif}.birthday-countdown span{font:11px Arial,sans-serif;color:#e5d1ee}.birthday-gifts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:20px 0}.birthday-gifts[hidden],.birthday-final[hidden]{display:none}.birthday-gift{border:1px solid #ffffff55;background:#ffffff1b;color:#fff;border-radius:16px;padding:12px 8px;min-width:0;cursor:pointer}.birthday-gift img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px}.birthday-gift b{display:block;margin:7px}.birthday-gift p{font:12px/1.5 Arial,sans-serif;white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0}.birthday-editor{margin-top:25px;padding:18px;background:#ffffff15;border-radius:18px;text-align:left}.birthday-editor select,.birthday-editor textarea,.birthday-editor input{width:100%;margin:7px 0 12px;padding:10px;border-radius:10px;border:1px solid #ffffff77;background:#fff;color:#332b3d}.birthday-editor textarea{min-height:95px}.birthday-admin{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:12px 0}.birthday-admin p{font:12px Arial,sans-serif;margin:0}.birthday-final{padding:20px;border:1px solid #ffffff55;border-radius:18px;margin-top:18px}.birthday-gift-detail{grid-column:1/-1;padding:18px;background:#ffffff20;border-radius:16px;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:550px){.birthday-gifts{grid-template-columns:repeat(2,minmax(0,1fr))}.birthday-card{margin-top:14px}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js">
 function viewerTime(s){if(!Number.isFinite(s))return '0:00';return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')}
@@ -493,10 +498,11 @@ function viewerFullscreen(){const v=document.getElementById('fullscreenVideo');i
    <div class="love-counter-hint">Desde el 26 de septiembre de 2025 · 3:49 p. m. · Toca para ver más</div>
    <div class="counter-special" id="counterSpecial"></div>
   </button>
-  <button class="btn lilac" onclick="go('story')">Comenzar</button>
+  <button class="btn lilac" onclick="go('story')">Comenzar</button><button class="birthday-home-link" onclick="go('birthday')">✦ Algo especial se acerca…</button>
  </div>
 </section>
 
+<section class="screen" id="birthday"><div class="screen-inner birthday-page"><div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('home')">← Inicio</button></div><div class="birthday-card"><div class="eyebrow">30 de noviembre · Para Fer</div><h2 id="birthdayHeading">Algo especial se acerca… ✨</h2><p id="birthdayIntro">Hay días que merecen una sorpresa.</p><div id="birthdayCountdown" class="birthday-countdown"></div><div id="birthdayGifts" class="birthday-gifts" hidden></div><div id="birthdayFinal" class="birthday-final" hidden></div></div></div></section>
 <section class="screen" id="story">
  <div class="screen-inner">
   <div class="topbar"><div class="brand">FER &amp; DAVIS</div><button class="back" onclick="go('home')">← Inicio</button></div>
@@ -585,7 +591,7 @@ function viewerFullscreen(){const v=document.getElementById('fullscreenVideo');i
   <div id="adminLoggedIn" style="display:none">
    <div class="admin-head"><div><div class="eyebrow">Centro de control</div><h3>Modo administrador</h3></div><span class="admin-dot" title="Sesión activa"></span></div>
    <p id="adminUserLabel">Sesión iniciada.</p>
-   <div class="admin-group-title">Contenido</div><div class="admin-shortcuts">
+   <div class="admin-group-title admin-full-only">Cumpleaños de Fer</div><div class="birthday-admin admin-full-only"><button class="btn lilac" type="button" onclick="adminGo('birthday')">🎁 Preparar 23 regalos</button><p id="birthdayAdminStatus">La sorpresa está oculta.</p><button class="btn ghost" id="birthdayRevealButton" type="button" onclick="toggleBirthdayReveal()">Revelar sorpresa a Fer</button></div><div class="admin-group-title">Contenido</div><div class="admin-shortcuts">
     <button class="admin-shortcut" type="button" onclick="adminGo('story')"><span>♡</span><b>Línea del tiempo</b><small>Nuestra historia</small></button>
     <button class="admin-shortcut" type="button" onclick="adminGo('album')"><span>▧</span><b>Álbum</b><small>Fotos y videos</small></button>
     <button class="admin-shortcut" type="button" onclick="adminGo('todos')"><span>✓</span><b>Lista</b><small>Planes juntos</small></button>
@@ -1488,5 +1494,49 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElement
 requestAnimationFrame(()=>prepareReveals(document.querySelector('.screen.active')||document));
 </script>
 </div>
+<script>
+
+let birthdayItems=[],birthdayRevealed=false,birthdayOpened=new Set(),birthdayCurrent=1;
+const birthdayTarget=new Date('2026-11-30T00:00:00-06:00').getTime();
+function birthdayClock(){const el=document.getElementById('birthdayCountdown');if(!el)return;const n=Math.max(0,birthdayTarget-Date.now());const vals=[Math.floor(n/86400000),Math.floor(n/3600000)%24,Math.floor(n/60000)%60,Math.floor(n/1000)%60];el.innerHTML=n?vals.map((v,i)=>'<div><strong>'+String(v).padStart(2,'0')+'</strong><span>'+['Días','Horas','Minutos','Segundos'][i]+'</span></div>').join(''):''}
+setInterval(birthdayClock,1000);birthdayClock();
+async function birthdayLoad(){
+ if(!window.supabaseClient)return;
+ const {data:settings,error:se}=await supabaseClient.from('birthday_settings').select('revealed').eq('id',1).single();
+ if(se){console.error('Cumpleaños:',se);return}
+ birthdayRevealed=!!settings?.revealed;
+ const status=document.getElementById('birthdayAdminStatus'),button=document.getElementById('birthdayRevealButton');
+ if(status)status.textContent=birthdayRevealed?'Sorpresa visible para Fer.':'Sorpresa oculta para Fer.';
+ if(button)button.textContent=birthdayRevealed?'Volver a ocultar sorpresa':'Revelar sorpresa a Fer';
+ if(isAdmin||birthdayRevealed){
+  const {data,error}=await supabaseClient.from('birthday_gifts').select('*').order('number');
+  if(error)console.error('Regalos:',error);
+  birthdayItems=data||[];
+ }else birthdayItems=[];
+ birthdayRender();
+}
+async function birthdaySigned(path){if(!path)return null;const {data,error}=await supabaseClient.storage.from('birthday-private').createSignedUrl(path,3600);if(error){console.warn(error);return null}return data.signedUrl}
+async function birthdayRender(){
+ const heading=document.getElementById('birthdayHeading'),intro=document.getElementById('birthdayIntro'),grid=document.getElementById('birthdayGifts'),final=document.getElementById('birthdayFinal');
+ if(!heading||!grid)return;
+ const visible=birthdayRevealed||isAdmin;
+ heading.textContent=visible?'23 regalos para tus 23 años 🎁':'Algo especial se acerca… ✨';
+ intro.textContent=visible?'Cada detalle tiene una historia que quiero contarte. ❤️':'No puedo decirte qué es… pero espero que te haga sonreír.';
+ grid.hidden=!visible;
+ if(!visible){final.hidden=true;return}
+ const cards=await Promise.all(Array.from({length:23},async(_,i)=>{const n=i+1,g=birthdayItems.find(x=>x.number===n),url=await birthdaySigned(g?.photo_path);return {n,g,url}}));
+ grid.innerHTML=cards.map(({n,g,url})=>'<button type="button" class="birthday-gift" onclick="birthdayOpen('+n+')">'+(url?'<img src="'+escapeHtml(url)+'" alt="Regalo '+n+'">':'<span style="font-size:32px">🎁</span>')+'<b>Regalo '+String(n).padStart(2,'0')+'</b><small>'+(birthdayOpened.has(n)?'♥ Descubierto':'Toca para descubrir')+'</small></button>').join('');
+ if(isAdmin){grid.insertAdjacentHTML('afterend','<div class="birthday-editor" id="birthdayEditor"><h3>Preparar dedicatoria (solo David)</h3><label>Regalo</label><select id="birthdayNumber" onchange="birthdayFillEditor()">'+Array.from({length:23},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'</option>').join('')+'</select><label>Fotografía privada</label><input id="birthdayPhoto" type="file" accept="image/*"><label>Dedicatoria</label><textarea id="birthdayDedication" placeholder="Escribe lo que significa este regalo…"></textarea><button class="btn lilac" type="button" onclick="birthdaySave()">Guardar regalo</button><p id="birthdaySaveStatus"></p></div>');birthdayFillEditor()}
+ final.hidden=birthdayOpened.size!==23;final.textContent='♥ 23 de 23 sorpresas descubiertas. Y esto es solo una pequeña parte de todo lo que quiero vivir contigo.';
+}
+function birthdayFillEditor(){const n=Number(document.getElementById('birthdayNumber')?.value||1),g=birthdayItems.find(x=>x.number===n);document.getElementById('birthdayDedication').value=g?.dedication||''}
+async function birthdaySave(){if(!isAdmin)return;const n=Number(document.getElementById('birthdayNumber').value),dedication=document.getElementById('birthdayDedication').value,file=document.getElementById('birthdayPhoto').files[0],existing=birthdayItems.find(x=>x.number===n),status=document.getElementById('birthdaySaveStatus');status.textContent='Guardando…';try{let photo_path=existing?.photo_path||null;if(file){if(file.size>50*1048576)throw Error('La imagen supera 50 MB');const ext=(file.name.split('.').pop()||'jpg').toLowerCase();photo_path='gift-'+n+'-'+crypto.randomUUID()+'.'+ext;const {error}=await supabaseClient.storage.from('birthday-private').upload(photo_path,file,{contentType:file.type});if(error)throw error}const {error}=await supabaseClient.from('birthday_gifts').upsert({number:n,dedication,photo_path,updated_at:new Date().toISOString()});if(error)throw error;await birthdayLoad();document.getElementById('birthdayNumber').value=n;birthdayFillEditor();document.getElementById('birthdaySaveStatus').textContent='Regalo '+n+' guardado en privado.'}catch(e){status.textContent='Error: '+e.message;console.error(e)}}
+async function toggleBirthdayReveal(){if(!isAdmin)return;const yes=confirm(birthdayRevealed?'¿Ocultar la sorpresa nuevamente?':'¿Revelar los 23 regalos a Fer? Hazlo solo después de entregarle los regalos físicos.');if(!yes)return;const {error}=await supabaseClient.from('birthday_settings').update({revealed:!birthdayRevealed,updated_at:new Date().toISOString()}).eq('id',1);if(error){alert(error.message);return}await birthdayLoad()}
+function birthdayOpen(n){if(!birthdayRevealed&&!isAdmin)return;birthdayOpened.add(n);const g=birthdayItems.find(x=>x.number===n);const text=g?.dedication||'Este regalo todavía está esperando su dedicatoria. ❤️';const el=document.getElementById('birthdayGifts');el.querySelector('.birthday-gift-detail')?.remove();el.insertAdjacentHTML('beforeend','<div class="birthday-gift-detail">♥ Regalo '+n+'\n\n'+escapeHtml(text)+'</div>');if(birthdayOpened.size===23){const fin=document.getElementById('birthdayFinal');fin.hidden=false;fin.textContent='♥ 23 de 23 sorpresas descubiertas. Y esto es solo una pequeña parte de todo lo que quiero vivir contigo.'}}
+const originalBirthdayGo=go;go=function(id){originalBirthdayGo(id);if(id==='birthday')birthdayLoad()};
+const originalBirthdayAdminState=setAdminState;setAdminState=function(session){originalBirthdayAdminState(session);birthdayLoad()};
+document.addEventListener('DOMContentLoaded',birthdayLoad);
+
+</script>
 </body>
 </html>
